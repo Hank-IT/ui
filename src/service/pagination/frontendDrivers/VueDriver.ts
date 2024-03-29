@@ -90,6 +90,6 @@ export class VueDriver {
   }
 
   public pages(dataDriver) {
-    return computed(() => dataDriver.pages(this.pageSizeRaw(), this.currentPageRaw()))
+    return computed(() => dataDriver.pages(this.totalPagesRaw(dataDriver), this.currentPageRaw()))
   }
 }
