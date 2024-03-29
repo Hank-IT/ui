@@ -57,10 +57,10 @@ export class GetCustomersRequest extends BaseRequest {
 ### Defining paginatable requests
 ``` typescript
 import { BaseRequest } from '@/service/requests/BaseRequest'
-import type Paginatable from '@/service/requests/contracts/Paginatable'
+import type PaginatableContract from '@/service/requests/contracts/PaginatableContract'
 import type ResponseContract from '@/service/requests/contracts/ResponseContract'
 
-export class GetCustomersRequest extends BaseRequest implements Paginatable {
+export class GetCustomersRequest extends BaseRequest implements PaginatableContract {
   method(): string {
     return 'GET'
   }
@@ -190,11 +190,11 @@ const pageSize = paginator.pageSize()
 ```
 
 ## Pagination with Request source
-You may use any request that implements the ``Paginatable`` interface as data source:
+You may use any request that implements the ``PaginatableContract`` interface as data source:
 
 ``` typescript
 // This is the request we want to paginate. Make sure you 
-// implement the "Paginatable" interface for this to work.
+// implement the "PaginatableContract" interface for this to work.
 const getInboxItemsRequest = new GetInboxItemsRequest
 
 // Create the data driver and provide our paginatable request

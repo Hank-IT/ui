@@ -1,4 +1,4 @@
-import type ContentContract from '@/service/requests/contracts/ContentContract'
+import ContentContract from "../contracts/ContentContract"
 
 export default class JsonContent implements ContentContract {
   protected data: object = {}

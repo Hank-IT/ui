@@ -1,6 +1,6 @@
-import { BaseDriver } from '@/service/pagination/dataDrivers/BaseDriver'
-import { PaginationDataDto } from '@/service/pagination/dtos/PaginationDataDto'
-import type Paginatable from '@/service/requests/contracts/Paginatable'
+import {BaseDriver} from "./BaseDriver";
+import { PaginationDataDto } from '../dtos/PaginationDataDto'
+import type {PaginatableContract} from "../contracts/PaginatableContract"
 
 export class RequestDriver extends BaseDriver {
   public constructor(request) {

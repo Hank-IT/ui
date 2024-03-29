@@ -1,10 +1,10 @@
 import qs from 'qs'
-import { ValidationException } from '@/service/requests/exceptions/ValidationException'
-import type LoadingStateContract from '@/service/requests/contracts/LoadingStateContract'
-import type RequestDriverContract from '@/service/requests/contracts/RequestDriverContract'
-import type JsonResponse from '@/service/requests/dtos/JsonResponse'
-import ContentContract from '@/service/requests/contracts/ContentContract'
-import type ResponseContract from '@/service/requests/contracts/ResponseContract'
+import {ValidationException} from "../exceptions/ValidationException"
+import type LoadingStateContract from "../contracts/LoadingStateContract"
+import type RequestDriverContract from "../contracts/RequestDriverContract"
+import JsonResponse from "../dtos/JsonResponse"
+import type ContentContract from "../contracts/ContentContract"
+import type ResponseContract from "../contracts/ResponseContract"
 
 export abstract class BaseRequest {
   protected params = {}

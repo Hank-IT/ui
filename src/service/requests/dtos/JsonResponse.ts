@@ -1,4 +1,4 @@
-import type ResponseContract from '@/service/requests/contracts/ResponseContract'
+import type ResponseContract from "../contracts/ResponseContract"
 
 export default class JsonResponse implements ResponseContract {
   protected data: object = {}

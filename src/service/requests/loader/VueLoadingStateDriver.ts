@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type LoadingStateContract from '@/service/requests/contracts/LoadingStateContract'
+import type LoadingStateContract from "../contracts/LoadingStateContract"
 
 export default class VueLoadingStateDriver implements LoadingStateContract {
   protected loading

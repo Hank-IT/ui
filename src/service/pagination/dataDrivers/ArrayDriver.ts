@@ -1,5 +1,5 @@
-import { BaseDriver } from '@/service/pagination/dataDrivers/BaseDriver'
-import { PaginationDataDto } from '@/service/pagination/dtos/PaginationDataDto'
+import {BaseDriver} from "./BaseDriver";
+import { PaginationDataDto } from '../dtos/PaginationDataDto'
 
 export class ArrayDriver extends BaseDriver {
   public constructor(data) {

@@ -1,4 +1,4 @@
-import type ContentContract from '@/service/requests/contracts/ContentContract'
+import ContentContract from "./ContentContract"
 
 export default interface RequestDriverContract {
   send(
