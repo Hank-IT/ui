@@ -8,8 +8,7 @@ This library supports axios and fetch for making requests. Select your preferred
 
 ### Axios
 ``` typescript
-import { BaseRequest } from '@/service/requests/BaseRequest'
-import AxiosDriver from '@/service/requests/drivers/AxiosDriver'
+import { BaseRequest, AxiosDriver } from '@hank-it/ui/service/requests'
 
 BaseRequest.setRequestDriver(new AxiosDriver)
 ```
@@ -21,8 +20,7 @@ BaseRequest.setRequestDriver(new AxiosDriver(true))
 
 ### Fetch
 ``` typescript
-import { BaseRequest } from '@/service/requests/BaseRequest'
-import FetchDriver from '@/service/requests/drivers/FetchDriver'
+import { BaseRequest, FetchDriver } from '@hank-it/ui/service/requests'
 
 BaseRequest.setRequestDriver(new FetchDriver)
 ```
@@ -36,8 +34,7 @@ BaseRequest.setRequestDriver(new FetchDriver('include))
 Each requests requires its own class:
 
 ``` typescript
-import { BaseRequest } from '@/service/requests/BaseRequest'
-import type ResponseContract from '@/service/requests/contracts/ResponseContract'
+import { BaseRequest, type ResponseContract } from '@hank-it/ui/service/requests'
 
 export class GetCustomersRequest extends BaseRequest {
   method(): string {
@@ -56,9 +53,7 @@ export class GetCustomersRequest extends BaseRequest {
 
 ### Defining paginatable requests
 ``` typescript
-import { BaseRequest } from '@/service/requests/BaseRequest'
-import type PaginatableContract from '@/service/requests/contracts/PaginatableContract'
-import type ResponseContract from '@/service/requests/contracts/ResponseContract'
+import { BaseRequest, type PaginatableContract, type ResponseContract } from '@hank-it/ui/service/requests'
 
 export class GetCustomersRequest extends BaseRequest implements PaginatableContract {
   method(): string {
