@@ -3,6 +3,7 @@ While this library can be used with any frontend, it includes Vue 3 support out 
 
 # Assumptions
  - This library expects data to be returned as json.
+ - Validation errors return status code 422.
 
 ## Requests
 This library supports axios and fetch for making requests. Select your preferred client while bootstraping your application:

@@ -7,4 +7,6 @@ export default interface RequestDriverContract {
     headers: object,
     content: ContentContract,
   )
+
+  errorHandler(error)
 }

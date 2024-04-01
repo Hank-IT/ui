@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     "./service/pagination": "./src/service/pagination/index.ts",
-    "./service/requests": "./src/service/requests/index.ts"
+    "./service/requests": "./src/service/requests/index.ts",
+    "./service/requests/exceptions": "./src/service/requests/exceptions/index.ts"
   },
   "scripts": {
     "dev": "vite",

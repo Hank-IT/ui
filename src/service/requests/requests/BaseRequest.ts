@@ -1,10 +1,10 @@
 import qs from 'qs'
-import {ValidationException} from "../exceptions/ValidationException"
 import type LoadingStateContract from "../contracts/LoadingStateContract"
 import type RequestDriverContract from "../contracts/RequestDriverContract"
 import JsonResponse from "../dtos/JsonResponse"
 import type ContentContract from "../contracts/ContentContract"
 import type ResponseContract from "../contracts/ResponseContract"
+import {ErrorHandler} from "../ErrorHandler";
 
 export abstract class BaseRequest {
   protected params = {}
@@ -13,11 +13,11 @@ export abstract class BaseRequest {
   protected static requestDriver: RequestDriverContract
   protected static loadingStateDriver: LoadingStateContract
 
-  static setRequestDriver(driver: RequestDriverContract) {
+  public static setRequestDriver(driver: RequestDriverContract) {
     this.requestDriver = driver
   }
 
-  static setLoadingStateDriver(driver: LoadingStateContract) {
+  public static setLoadingStateDriver(driver: LoadingStateContract) {
     this.loadingStateDriver = driver
   }
 
@@ -25,7 +25,9 @@ export abstract class BaseRequest {
 
   abstract url(): string
 
-  abstract accepts(): ResponseContract
+  accepts(): ResponseContract {
+    return JsonResponse
+  }
 
   withParams(params) {
     this.params = {
@@ -58,7 +60,7 @@ export abstract class BaseRequest {
 
   async send() {
     try {
-      BaseRequest.loadingStateDriver.setLoading(true)
+      //BaseRequest.loadingStateDriver.setLoading(true)
 
       return await BaseRequest.requestDriver.send(
         this.buildUrl(),
@@ -67,16 +69,12 @@ export abstract class BaseRequest {
         this.content,
         this.accepts()
       )
-    } catch(e) {
-      console.error(e)
+    } catch(error) {
 
-      if (e.response.status === 422) {
-        throw new ValidationException(e.response.data)
-      }
 
-      throw(e)
+      new ErrorHandler(error)
     } finally {
-      BaseRequest.loadingStateDriver.setLoading(false)
+     // BaseRequest.loadingStateDriver.setLoading(false)
     }
   }
 

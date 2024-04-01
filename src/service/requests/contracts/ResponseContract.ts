@@ -6,4 +6,6 @@ export default interface ResponseContract {
   getStatusCode(): number
 
   getHeaders(): object
+
+  isOK(): boolean
 }

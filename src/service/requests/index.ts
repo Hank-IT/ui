@@ -8,7 +8,6 @@ import FetchDriver from "./drivers/FetchDriver.ts"
 import FormDataContent from "./dtos/FormDataContent.ts"
 import JsonContent from "./dtos/JsonContent.ts"
 import JsonResponse from "./dtos/JsonResponse.ts"
-import {ValidationException} from "./exceptions/ValidationException.ts"
 import VueLoadingStateDriver from "./loader/VueLoadingStateDriver.ts"
 import {BaseRequest} from "./requests/BaseRequest.ts"
 
@@ -23,7 +22,6 @@ export {
     FormDataContent,
     JsonResponse,
     JsonContent,
-    ValidationException,
     VueLoadingStateDriver,
     BaseRequest
 }

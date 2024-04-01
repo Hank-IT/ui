@@ -5,7 +5,7 @@ export default class JsonResponse implements ResponseContract {
   protected response: object = {}
   protected statusCode: number
 
-  public constructor(bodyPromise, response, statusCode) {
+  public constructor(bodyPromise, response, statusCode, ok) {
     this.bodyPromise = this.internalBodyHandler(bodyPromise)
     this.response = response
     this.statusCode = statusCode
