@@ -18,7 +18,7 @@ export class RequestDriver extends BaseDriver {
       pageSize: pageSize,
       pageNumber: pageNumber
     }).send().then(result => {
-      return result.getDataPromise()
+      return result.getBodyPromise()
     }).then(data => {
       return new PaginationDataDto(
         this.request.getPage(data),

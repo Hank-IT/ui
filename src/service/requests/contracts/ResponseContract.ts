@@ -1,5 +1,5 @@
 export default interface ResponseContract {
-  getDataPromise(): object
+  getBodyPromise(): object
 
   getRaw(): object
 

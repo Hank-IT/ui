@@ -11,7 +11,7 @@ export default class JsonResponse implements ResponseContract {
     this.statusCode = statusCode
   }
 
-  public getDataPromise(): object {
+  public getBodyPromise(): object {
     return this.data
   }
 
