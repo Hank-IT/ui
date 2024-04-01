@@ -1,6 +1,9 @@
 # Requirements
 While this library can be used with any frontend, it includes Vue 3 support out of box and assumes the usage of Vue 3 in the documentation.
 
+# Assumptions
+ - This library expects data to be returned as json.
+
 ## Requests
 This library supports axios and fetch for making requests. Select your preferred client while bootstraping your application:
 

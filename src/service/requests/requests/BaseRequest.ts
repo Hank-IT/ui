@@ -47,6 +47,8 @@ export abstract class BaseRequest {
   }
 
   protected buildUrl(): string {
+    // ToDo: Remove window.SERVER
+
     if (Object.keys(this.params).length === 0) {
       return window.SERVER + this.url()
     }
@@ -58,15 +60,13 @@ export abstract class BaseRequest {
     try {
       BaseRequest.loadingStateDriver.setLoading(true)
 
-      const response = await BaseRequest.requestDriver.send(
+      return await BaseRequest.requestDriver.send(
         this.buildUrl(),
         this.method(),
         this.headers(),
         this.content,
         this.accepts()
       )
-
-      return this.successResponseHandler(response)
     } catch(e) {
       console.error(e)
 
@@ -86,9 +86,5 @@ export abstract class BaseRequest {
     }
 
    return false
-  }
-
-  successResponseHandler(response: JsonResponse) {
-    return response
   }
 }

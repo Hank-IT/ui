@@ -40,7 +40,6 @@ export default class FetchDriver implements RequestDriverContract {
 
     const response = await fetch(url, config)
 
-    // ToDo: json() method is problematic here
     return new (responseDto)(response.json(), response, response.status)
   }
 
