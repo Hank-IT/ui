@@ -8,7 +8,7 @@ import {ResponseError} from "../dtos/ResponseError";
 export default class AxiosDriver implements RequestDriverContract {
     protected withCredentials: boolean
 
-    constructor(withCredentials: boolean) {
+    public constructor(withCredentials: boolean) {
         this.withCredentials = withCredentials
     }
 
@@ -47,7 +47,7 @@ export default class AxiosDriver implements RequestDriverContract {
 
         console.debug("AxiosDriver: Returning response")
 
-        return new (responseDto)(
+        return new responseDto(
             new Promise(resolve => {
                 resolve(response.data)
             }),

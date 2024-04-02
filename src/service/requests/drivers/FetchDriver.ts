@@ -6,7 +6,7 @@ import {ResponseError} from "../dtos/ResponseError";
 export default class FetchDriver implements RequestDriverContract {
     protected withCredentials: strinbg
 
-    constructor(withCredentials: string) {
+    public constructor(withCredentials: string) {
         this.withCredentials = withCredentials
     }
 

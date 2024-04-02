@@ -3,7 +3,7 @@ import ContentContract from "../contracts/ContentContract"
 export default class FormDataContent implements ContentContract {
   protected data: object = {}
 
-  constructor(data: object) {
+  public constructor(data: object) {
     this.data = this.toFormData(data)
   }
 

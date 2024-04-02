@@ -1,6 +1,12 @@
 import { computed, ref } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
 
 export class VueDriver {
+  protected data: Ref<array>
+  protected internalCurrentPageRef: Ref<number>
+  protected internalPageSizeRef: Ref<number>
+  protected total: Ref<number>
+
   public constructor(currentPage, pageSize) {
     this.data = ref([])
     this.internalCurrentPageRef = ref(currentPage)
@@ -8,39 +14,39 @@ export class VueDriver {
     this.total = ref(0)
   }
 
-  public start(dataDriver) {
+  public start(dataDriver): ComputedRef<number> {
     return computed(() => {
       return dataDriver.start(this.currentPageRaw(), this.pageSizeRaw())
     })
   }
 
-  public end(dataDriver) {
+  public end(dataDriver): ComputedRef<number> {
     return computed(() => {
       return dataDriver.end(this.currentPageRaw(), this.pageSizeRaw(), this.totalRaw())
     })
   }
 
-  public totalPages(dataDriver) {
+  public totalPages(dataDriver): ComputedRef<number> {
     return computed(() => this.totalPagesRaw(dataDriver))
   }
 
-  public getPageData() {
+  public getPageData(): object {
     return this.data
   }
 
-  public setPageData(data) {
+  public setPageData(data): void {
     this.data.value = data
   }
 
-  public setTotal(total) {
+  public setTotal(total): void {
     this.total.value = total
   }
 
-  public getTotal() {
+  public getTotal(): Ref<number> {
     return this.total
   }
 
-  public currentPage(dataDriver) {
+  public currentPage(dataDriver): ComputedRef<number> {
     return computed({
       get: () => this.internalCurrentPageRef.value,
       set: (value) => {
@@ -59,7 +65,7 @@ export class VueDriver {
     })
   }
 
-  public pageSize(dataDriver) {
+  public pageSize(dataDriver): ComputedRef<number> {
     return computed({
       get: () => this.internalPageSizeRef.value,
       set: (value) => {
@@ -73,23 +79,23 @@ export class VueDriver {
     })
   }
 
-  public currentPageRaw() {
+  public currentPageRaw(): number {
     return this.internalCurrentPageRef.value
   }
 
-  public pageSizeRaw() {
+  public pageSizeRaw(): number {
     return this.internalPageSizeRef.value
   }
 
-  public totalRaw() {
+  public totalRaw(): number {
     return this.total.value
   }
 
-  public totalPagesRaw(dataDriver) {
+  public totalPagesRaw(dataDriver): number {
     return dataDriver.totalPages(this.pageSizeRaw(), this.totalRaw())
   }
 
-  public pages(dataDriver) {
+  public pages(dataDriver): ComputedRef<array> {
     return computed(() => dataDriver.pages(this.totalPagesRaw(dataDriver), this.currentPageRaw()))
   }
 }

@@ -8,5 +8,5 @@ export default interface RequestDriverContract {
     content: ContentContract,
   )
 
-  errorHandler(error)
+  buildErrorResponse(error)
 }
