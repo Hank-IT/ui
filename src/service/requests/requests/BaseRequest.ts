@@ -70,8 +70,6 @@ export abstract class BaseRequest {
         this.accepts()
       )
     } catch(error) {
-
-
       new ErrorHandler(error)
     } finally {
      // BaseRequest.loadingStateDriver.setLoading(false)

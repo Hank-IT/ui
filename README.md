@@ -31,7 +31,7 @@ BaseRequest.setRequestDriver(new FetchDriver)
 
 You may enable credential support using:
 ``` typescript
-BaseRequest.setRequestDriver(new FetchDriver('include))
+BaseRequest.setRequestDriver(new FetchDriver('include'))
 ```
 
 ## Defining requests
@@ -48,10 +48,6 @@ export class GetCustomersRequest extends BaseRequest {
   url(): string {
     return '/api/v1/customers'
   }
-  
-  accepts(): ResponseContract {
-    return JsonResponse
-  }
 }
 ```
 
@@ -66,10 +62,6 @@ export class GetCustomersRequest extends BaseRequest implements PaginatableContr
 
   url(): string {
     return '/api/v1/customers'
-  }
-  
-  accepts(): ResponseContract {
-    return JsonResponse
   }
   
   // Used to retrieve the page data from the response
@@ -90,7 +82,7 @@ export class GetCustomersRequest extends BaseRequest implements PaginatableContr
 ``` typescript
 new GetCustomersRequest()
     .send()
-    .then(result => result.getDataPromise())
+    .then(result => result.getBodyPromise())
     .then(data => {
         // Do something with data
     })
@@ -104,7 +96,7 @@ new GetCustomersRequest()
         // result.getRaw()
         // result.getStatusCode()
         
-        return result.getDataPromise()
+        return result.getBodyPromise()
     })
     .then(data => {
         // Do something with data
