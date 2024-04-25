@@ -18,7 +18,7 @@ export class ErrorHandler {
         } else if (error instanceof ResponseError) {
             this.handleResponseError()
         } else {
-            console.error('Unknown error received.')
+            console.error('HankIT-UI: Unknown error received.', error)
         }
     }
 

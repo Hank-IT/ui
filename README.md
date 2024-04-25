@@ -53,9 +53,9 @@ export class GetCustomersRequest extends BaseRequest {
 
 ### Defining paginatable requests
 ``` typescript
-import { BaseRequest, type PaginatableContract, type ResponseContract } from '@hank-it/ui/service/requests'
+import { BaseRequest, type PaginatableRequest, type ResponseContract } from '@hank-it/ui/service/requests'
 
-export class GetCustomersRequest extends BaseRequest implements PaginatableContract {
+export class GetCustomersRequest extends BaseRequest implements PaginatableRequest {
   method(): string {
     return 'GET'
   }
@@ -181,11 +181,11 @@ const pageSize = paginator.pageSize()
 ```
 
 ## Pagination with Request source
-You may use any request that implements the ``PaginatableContract`` interface as data source:
+You may use any request that implements the ``PaginatableRequest`` interface as data source:
 
 ``` typescript
 // This is the request we want to paginate. Make sure you 
-// implement the "PaginatableContract" interface for this to work.
+// implement the "PaginatableRequest" interface for this to work.
 const getInboxItemsRequest = new GetInboxItemsRequest
 
 // Create the data driver and provide our paginatable request

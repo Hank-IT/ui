@@ -1,26 +1,24 @@
 import type ContentContract from "./contracts/ContentContract.ts"
 import type LoadingStateContract from "./contracts/LoadingStateContract.ts"
-import type PaginatableContract from "../pagination/contracts/PaginatableContract.ts"
+import type PaginatableRequest from "../pagination/contracts/PaginatableRequest.ts"
 import type RequestDriverContract from "./contracts/RequestDriverContract.ts"
 import type ResponseContract from "./contracts/ResponseContract.ts"
-import AxiosDriver from "./drivers/AxiosDriver.ts"
 import FetchDriver from "./drivers/FetchDriver.ts"
 import FormDataContent from "./dtos/FormDataContent.ts"
 import JsonContent from "./dtos/JsonContent.ts"
-import JsonResponse from "./dtos/JsonResponse.ts"
+import BaseResponse from "./BaseResponse.ts"
 import VueLoadingStateDriver from "./loader/VueLoadingStateDriver.ts"
-import {BaseRequest} from "./requests/BaseRequest.ts"
+import {BaseRequest} from "./BaseRequest.ts"
 
 export {
     ContentContract,
     LoadingStateContract,
-    PaginatableContract,
+    PaginatableRequest,
     RequestDriverContract,
     ResponseContract,
-    AxiosDriver,
     FetchDriver,
     FormDataContent,
-    JsonResponse,
+    BaseResponse,
     JsonContent,
     VueLoadingStateDriver,
     BaseRequest

@@ -2,24 +2,20 @@ import type RequestDriverContract from '@/service/requests/contracts/RequestDriv
 import type ContentContract from '@/service/requests/contracts/ContentContract'
 import type ResponseContract from '@/service/requests/contracts/ResponseContract'
 import {ResponseError} from "../dtos/ResponseError";
+import ResponseDto from "../dtos/ResponseDto";
 
 export default class FetchDriver implements RequestDriverContract {
-    protected withCredentials: strinbg
-
-    public constructor(withCredentials: string) {
-        this.withCredentials = withCredentials
-    }
+    public constructor(protected corsWithCredentials: boolean = false) {}
 
     public async send(
         url: string,
         method: string,
         headers: object,
         content: ContentContract,
-        responseDto: ResponseContract,
+        corsWithCredentials = undefined,
     ) {
         const mergedHeaders = {
             ...headers,
-            ...responseDto.getHeaders(),
 
             // ToDo: Make this configurable
             'X-XSRF-Token': this.getCookie('XSRF-TOKEN')
@@ -32,7 +28,7 @@ export default class FetchDriver implements RequestDriverContract {
         const config = {
             method: method,
             headers: mergedHeaders,
-            credentials: this.withCredentials,
+            credentials: this.getCorsWithCredentials(corsWithCredentials),
         }
 
         if (!['GET', 'HEAD'].includes(method)) {
@@ -45,7 +41,7 @@ export default class FetchDriver implements RequestDriverContract {
             throw this.buildErrorResponse(response)
         }
 
-        return new responseDto(response.json(), response, response.status)
+        return new ResponseDto(response.json(), response.status, response)
     }
 
     protected getCookie(cname) {
@@ -62,6 +58,18 @@ export default class FetchDriver implements RequestDriverContract {
             }
         }
         return ''
+    }
+
+    protected getCorsWithCredentials(corsWithCredentials) {
+        // Request takes precedence
+        if (corsWithCredentials === true) {
+            return 'include'
+        } else if(corsWithCredentials === false) {
+            return 'omit'
+        }
+
+        // Fallback to default
+        return this.corsWithCredentials ? 'include': 'omit'
     }
 
     public buildErrorResponse(error) {
