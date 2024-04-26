@@ -1,4 +1,4 @@
-export default class ContentContract {
+export default interface ContentContract {
   getContent(): object
 
   getHeaders(): object

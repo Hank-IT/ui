@@ -12,6 +12,7 @@ export default class FetchDriver implements RequestDriverContract {
         headers: object,
         content: ContentContract,
         corsWithCredentials = undefined,
+        abortSignal = undefined
     ) {
         const mergedHeaders = {
             ...headers,
@@ -28,6 +29,10 @@ export default class FetchDriver implements RequestDriverContract {
             method: method,
             headers: mergedHeaders,
             credentials: this.getCorsWithCredentials(corsWithCredentials),
+        }
+
+        if (abortSignal) {
+            config.signal = abortSignal
         }
 
         if (!['GET', 'HEAD'].includes(method)) {

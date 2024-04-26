@@ -201,9 +201,12 @@ const pageSize = paginator.pageSize()
 ```
 
 ## ToDo
-- Request cancellation
-    - https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#aborting_a_fetch
 - File responses (blob)
 - File upload progress handling
 - XSRF-TOKEN Support for fetch abstraction
 - Infinite Scrolling
+- General cleanup
+- Error handling
+- Add missing types
+- Pagination improvements
+- Fix exports

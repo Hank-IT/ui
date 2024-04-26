@@ -8,6 +8,7 @@ export abstract class BaseRequest {
     protected params = {}
     protected content: ContentContract
     public loadingStateDriver: LoadingStateContract = undefined
+    protected signal = undefined
 
     protected static defaultBaseUrl: string
 
@@ -76,7 +77,8 @@ export abstract class BaseRequest {
             this.method(),
             this.headers(),
             this.content,
-            this.getCorsWithCredentials()
+            this.getCorsWithCredentials(),
+            this.signal,
         ).then((responseDto: ResponseDto) => {
             const response = this.getResponse()
 
