@@ -5,6 +5,11 @@ const routes = [
         path: '/pagination',
         component: () => import('@view/pagination/Pagination.vue'),
         name: 'pagination',
+    },
+    {
+        path: '/requests',
+        component: () => import('@view/requests/Requests.vue'),
+        name: 'requests',
     }
 ]
 

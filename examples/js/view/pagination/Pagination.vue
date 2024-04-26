@@ -7,10 +7,11 @@ import {BaseRequest, VueLoadingStateDriver} from "../../../../src/service/reques
 import {FetchDriver} from "../../../../src/service/requests"
 import {GetProductsRequest} from "./requests/GetProductsRequest";
 import {Paginator, RequestDriver, VueDriver} from "../../../../src/service/pagination";
+import VueLoaderDriverFactory from "../../../../src/service/requests/factories/VueLoaderDriverFactory";
 
 /* Booting */
 BaseRequest.setRequestDriver(new FetchDriver(true))
-BaseRequest.setLoadingStateDriver(new VueLoadingStateDriver)
+BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
 
 const getProductsRequest = new GetProductsRequest
 

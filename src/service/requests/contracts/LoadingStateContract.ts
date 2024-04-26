@@ -1,5 +1,5 @@
 export default interface LoadingStateContract {
-  isLoading(): Boolean
+  isLoading(): boolean
 
-  setLoading(value: Boolean): void
+  setLoading(value: boolean): void
 }

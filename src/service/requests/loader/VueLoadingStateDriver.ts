@@ -1,18 +1,18 @@
-import { ref } from 'vue'
-import type LoadingStateContract from "../contracts/LoadingStateContract"
+import { Ref, ref } from 'vue'
+import type LoadingStateContract from '../contracts/LoadingStateContract'
 
-export default class VueLoadingStateDriver implements LoadingStateContract {
-  protected loading
+export default class VueLoadingState implements LoadingStateContract {
+  protected loading: Ref<boolean>
 
   constructor() {
-    this.loading = ref<Boolean>(false)
+    this.loading = ref<boolean>(false)
   }
 
-  isLoading() {
-    return this.loading
+  isLoading(): boolean {
+    return this.loading.value
   }
 
-  setLoading(value) {
+  setLoading(value: boolean) {
     return this.loading.value = value
   }
 }

@@ -6,21 +6,9 @@ While this library can be used with any frontend, it includes Vue 3 support out 
  - Validation errors return status code 422.
 
 ## Requests
-This library supports axios and fetch for making requests. Select your preferred client while bootstraping your application:
+This library supports fetch. Select your preferred client while bootstraping your application:
 
 ## Request driver
-
-### Axios
-``` typescript
-import { BaseRequest, AxiosDriver } from '@hank-it/ui/service/requests'
-
-BaseRequest.setRequestDriver(new AxiosDriver)
-```
-
-You may enable credential support using:
-``` typescript
-BaseRequest.setRequestDriver(new AxiosDriver(true))
-```
 
 ### Fetch
 ``` typescript
@@ -31,7 +19,7 @@ BaseRequest.setRequestDriver(new FetchDriver)
 
 You may enable credential support using:
 ``` typescript
-BaseRequest.setRequestDriver(new FetchDriver('include'))
+BaseRequest.setRequestDriver(new FetchDriver(true))
 ```
 
 ## Defining requests
@@ -214,11 +202,8 @@ const pageSize = paginator.pageSize()
 
 ## ToDo
 - Request cancellation
-    - https://axios-http.com/docs/cancellation
     - https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#aborting_a_fetch
-- Configurable field names for pagination
-- Pagination using offset and limit
 - File responses (blob)
 - File upload progress handling
-- XSRF-TOKEN Support for fetch/axios abstraction
+- XSRF-TOKEN Support for fetch abstraction
 - Infinite Scrolling

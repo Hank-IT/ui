@@ -1,26 +1,31 @@
 import qs from 'qs'
 import type LoadingStateContract from "./contracts/LoadingStateContract"
 import type RequestDriverContract from "./contracts/RequestDriverContract"
-import BaseResponse from "./BaseResponse"
 import type ContentContract from "./contracts/ContentContract"
-import type ResponseContract from "./contracts/ResponseContract"
 import {ErrorHandler} from "./ErrorHandler";
 
 export abstract class BaseRequest {
     protected params = {}
     protected content: ContentContract
+    public loadingStateDriver: LoadingStateContract = undefined
 
     protected static defaultBaseUrl: string
 
     protected static requestDriver: RequestDriverContract
-    protected static loadingStateDriver: LoadingStateContract
+    protected static loaderStateFactory: ViewLoaderFactoryContract
+
+    public constructor() {
+        if (BaseRequest.loaderStateFactory !== undefined) {
+            this.loadingStateDriver = BaseRequest.loaderStateFactory.make()
+        }
+    }
 
     public static setRequestDriver(driver: RequestDriverContract) {
         this.requestDriver = driver
     }
 
-    public static setLoadingStateDriver(driver: LoadingStateContract) {
-        this.loadingStateDriver = driver
+    public static setLoaderStateFactory(factory: ViewLoaderFactoryContract): void {
+        this.loaderStateFactory = factory
     }
 
     public static setDefaultBaseUrl(url: string) {
@@ -30,6 +35,11 @@ export abstract class BaseRequest {
     abstract method(): string
 
     abstract url(): string
+
+    public setParams(params: object): BaseRequest {
+        this.params = params
+        return this
+    }
 
     withParams(params) {
         this.params = {
@@ -52,13 +62,15 @@ export abstract class BaseRequest {
 
     protected buildUrl(): string {
         const url = Object.keys(this.params).length === 0
-            ? this.url
+            ? this.url()
             : this.url() + '?' + qs.stringify(this.params)
 
         return new URL(url, this.baseUrl() ?? this.defaultBaseUrl)
     }
 
     public send() {
+        this.loadingStateDriver?.setLoading(true)
+
         return BaseRequest.requestDriver.send(
             this.buildUrl(),
             this.method(),
@@ -75,16 +87,12 @@ export abstract class BaseRequest {
             return response.getBodyPromise()
         }).catch(error => new ErrorHandler(error))
           .finally(() => {
-               //
+              this.loadingStateDriver?.setLoading(false)
           })
     }
 
-    isLoading() {
-        if (this.loadingStateDriver) {
-            return this.loadingStateDriver.isLoading()
-        }
-
-        return false
+    public isLoading(): boolean {
+        return this.loadingStateDriver?.isLoading()
     }
 
     protected baseUrl(): undefined {

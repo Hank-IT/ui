@@ -1,6 +1,5 @@
 import type RequestDriverContract from '@/service/requests/contracts/RequestDriverContract'
 import type ContentContract from '@/service/requests/contracts/ContentContract'
-import type ResponseContract from '@/service/requests/contracts/ResponseContract'
 import {ResponseError} from "../dtos/ResponseError";
 import ResponseDto from "../dtos/ResponseDto";
 
