@@ -149,7 +149,7 @@ const dataDriver = new ArrayDriver(rows)
 
 // Create frontend driver and give initial  
 // values for currentpage and pageSize
-const frontendDriver = new VueDriver(1, 2)
+const frontendDriver = new VuePaginationDriver(1, 2)
 
 const paginator = new Paginator(dataDriver, frontendDriver)
 
@@ -181,7 +181,7 @@ const dataDriver = new RequestDriver(getInboxItemsRequest)
 
 // Create frontend driver and give initial  
 // values for currentpage and pageSize
-const frontendDriver = new VueDriver(1, 2)
+const frontendDriver = new VuePaginationDriver(1, 2)
 
 const paginator = new Paginator(dataDriver, frontendDriver)
 
@@ -204,5 +204,4 @@ const pageSize = paginator.pageSize()
 - File responses (blob)
 - File upload progress handling
 - Infinite Scrolling
-- Pagination improvements
 - Update documentation

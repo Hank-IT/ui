@@ -6,13 +6,23 @@ import NotFoundException from './exceptions/NotFoundException'
 import UnauthorizedException from './exceptions/UnauthorizedException'
 import ValidationException from './exceptions/ValidationException'
 import ResponseException from './exceptions/ResponseException'
-import {NoResponseReceivedException} from './exceptions'
+import {NoResponseReceivedException, ServerErrorException} from './exceptions'
 
 export default class ErrorHandler {
     protected error: NoResponseReceivedError|RequestError|ResponseError
 
-    constructor(error: NoResponseReceivedError|RequestError|ResponseError) {
+    protected static handler = undefined
+
+    public constructor(error: NoResponseReceivedError|RequestError|ResponseError) {
         this.error = error
+
+        // Check if there is a global error handler set
+        if (ErrorHandler.handler) {
+            // If handler returns false, we don't process the error further
+            if (ErrorHandler.handler(error) === false) {
+                return
+            }
+        }
 
         if (error instanceof NoResponseReceivedError) {
             throw new NoResponseReceivedException(error)
@@ -21,6 +31,10 @@ export default class ErrorHandler {
         } else {
             console.error('HankIT-UI: Unknown error received.', error)
         }
+    }
+
+    public static registerHandler(callback) {
+        ErrorHandler.handler = callback
     }
 
     protected handleResponseError() {
@@ -38,6 +52,10 @@ export default class ErrorHandler {
 
         if (this.error.getStatusCode() === 422) {
             throw new ValidationException(this.error)
+        }
+
+        if (this.error.getStatusCode() === 500) {
+            throw new ServerErrorException(this.error)
         }
 
         throw new ResponseException(this.error)

@@ -10,7 +10,7 @@ export default class RequestDriver extends BaseDriver {
 
     public get(pageNumber: number, pageSize: number): Promise<PaginationDataDto> {
         return this.request
-            .setPaginationParams(pageSize, pageNumber)
+            .setPaginationParams(pageNumber, pageSize)
             .send()
             .then((response: PaginationResponseContract) => {
                 return new PaginationDataDto(

@@ -1,15 +1,22 @@
 import ArrayDriver from './dataDrivers/ArrayDriver'
 import RequestDriver from './dataDrivers/RequestDriver'
 import PaginationDataDto from './dtos/PaginationDataDto'
-import VueDriver from './frontendDrivers/VueDriver'
+import VuePaginationDriver from './frontendDrivers/VuePaginationDriver'
 import Paginator from './Paginator'
 import BaseDriver from './dataDrivers/BaseDriver'
+import PaginationResponseContract from './contracts/PaginationResponseContract'
+import VuePaginationDriverFactory from './factories/VuePaginationDriverFactory'
 
 export {
     ArrayDriver,
     RequestDriver,
     BaseDriver,
     PaginationDataDto,
-    VueDriver,
+    VuePaginationDriver,
     Paginator,
+    VuePaginationDriverFactory,
+}
+
+export type {
+    PaginationResponseContract,
 }

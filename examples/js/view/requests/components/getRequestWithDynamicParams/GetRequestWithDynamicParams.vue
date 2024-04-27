@@ -15,10 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed} from "vue";
-import VueLoaderDriverFactory from "../../../../../../src/service/requests/factories/VueLoaderDriverFactory";
-import {BaseRequest, FetchDriver} from "../../../../../../src/service/requests";
-import {GetProductsRequest} from "./GetProductsRequest";
+import {ref, computed} from 'vue'
+import {VueLoaderDriverFactory, BaseRequest, FetchDriver} from '@hank-it/ui/service/requests'
+import {GetProductsRequest} from './GetProductsRequest'
 
 /* Booting */
 BaseRequest.setRequestDriver(new FetchDriver({

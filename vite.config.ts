@@ -28,6 +28,7 @@ export default defineConfig({
     alias: {
       '@js': '/js',
       '@view': '/js/view',
+      '@hank-it/ui': '/../src',
     },
   },
 })

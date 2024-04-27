@@ -5,11 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed} from "vue";
-import VueLoaderDriverFactory from "../../../../../../src/service/requests/factories/VueLoaderDriverFactory";
-import {BaseRequest, FetchDriver} from "../../../../../../src/service/requests";
-import {ServerErrorRequest, GetProductsRequestResponse} from "./ServerErrorRequest";
-import ResponseException from '../../../../../../src/service/requests/exceptions/ResponseException'
+import {ref} from 'vue'
+import { VueLoaderDriverFactory, BaseRequest, FetchDriver, ResponseException, ErrorHandler } from '@hank-it/ui/service/requests'
+import {ServerErrorRequest} from './ServerErrorRequest'
 
 /* Booting */
 BaseRequest.setRequestDriver(new FetchDriver({
@@ -23,17 +21,33 @@ const data = ref({})
 const request = new ServerErrorRequest()
 
 function sendRequest() {
-    request.send().then(response => {
-        data.value = response.data
-    }).catch((response: ResponseException) => {
-        console.log(response.getError().getStatusCode())
-        console.log(response.getError().getHeaders())
-        console.log(response.getError().getOriginalError())
-        response.getError().getBodyPromise().then(body => {
-            console.log(body)
+    request.send()
+        .then(response => {
+            data.value = response.data
         })
-    })
+        .catch((response: ResponseException) => {
+            console.log('Specific error handler')
+
+            console.log(response.getError().getStatusCode())
+            console.log(response.getError().getHeaders())
+            console.log(response.getError().getOriginalError())
+            response.getError().getBodyPromise().then(body => {
+                console.log(body)
+            })
+        })
 }
+
+// Global error handler
+ErrorHandler.registerHandler(error => {
+    console.debug("Registered handler")
+
+    console.log(error.getStatusCode())
+    console.log(error.getHeaders())
+    console.log(error.getOriginalError())
+    error.getBodyPromise().then(body => {
+        console.log(body)
+    })
+})
 
 sendRequest()
 </script>
