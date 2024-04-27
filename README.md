@@ -203,10 +203,6 @@ const pageSize = paginator.pageSize()
 ## ToDo
 - File responses (blob)
 - File upload progress handling
-- XSRF-TOKEN Support for fetch abstraction
 - Infinite Scrolling
-- General cleanup
-- Error handling
-- Add missing types
 - Pagination improvements
-- Fix exports
+- Update documentation

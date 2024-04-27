@@ -1,8 +1,9 @@
 export default class NoResponseReceivedError {
-    constructor(
-        request,
-        rawError
-    ) {
-        // ToDo
+    public constructor(
+        protected originalError: object
+    ) {}
+
+    public getOriginalError(): object {
+        return this.originalError
     }
 }

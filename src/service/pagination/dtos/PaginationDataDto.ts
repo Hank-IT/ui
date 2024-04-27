@@ -1,15 +1,15 @@
 export default class PaginationDataDto {
-  public constructor(data, total) {
-    this.data = data
-
-    this.total = total
+  public constructor(
+      protected data: object[],
+      protected total: number,
+  ) {
   }
 
-  public getData() {
+  public getData(): object[] {
     return this.data
   }
 
-  public getTotal() {
+  public getTotal(): number {
     return this.total
   }
 }

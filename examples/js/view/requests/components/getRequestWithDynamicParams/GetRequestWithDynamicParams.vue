@@ -21,7 +21,9 @@ import {BaseRequest, FetchDriver} from "../../../../../../src/service/requests";
 import {GetProductsRequest} from "./GetProductsRequest";
 
 /* Booting */
-BaseRequest.setRequestDriver(new FetchDriver(true))
+BaseRequest.setRequestDriver(new FetchDriver({
+    corsWithCredentials: false,
+}))
 BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
 
 /* Component */

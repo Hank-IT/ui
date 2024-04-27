@@ -5,17 +5,17 @@ import PageExpiredException from './exceptions/PageExpiredException'
 import NotFoundException from './exceptions/NotFoundException'
 import UnauthorizedException from './exceptions/UnauthorizedException'
 import ValidationException from './exceptions/ValidationException'
+import ResponseException from './exceptions/ResponseException'
+import {NoResponseReceivedException} from './exceptions'
 
-export class ErrorHandler {
+export default class ErrorHandler {
     protected error: NoResponseReceivedError|RequestError|ResponseError
 
     constructor(error: NoResponseReceivedError|RequestError|ResponseError) {
         this.error = error
 
         if (error instanceof NoResponseReceivedError) {
-            // ToDo
-        } else if(error instanceof RequestError) {
-            // ToDo
+            throw new NoResponseReceivedException(error)
         } else if (error instanceof ResponseError) {
             this.handleResponseError()
         } else {
@@ -39,5 +39,7 @@ export class ErrorHandler {
         if (this.error.getStatusCode() === 422) {
             throw new ValidationException(this.error)
         }
+
+        throw new ResponseException(this.error)
     }
 }

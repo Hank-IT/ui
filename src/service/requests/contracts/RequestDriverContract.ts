@@ -1,4 +1,5 @@
 import ContentContract from './ContentContract'
+import DriverConfigContract from './DriverConfigContract'
 
 export default interface RequestDriverContract {
   send(
@@ -6,6 +7,7 @@ export default interface RequestDriverContract {
     method: string,
     headers: object,
     content: ContentContract,
+    requestConfig: DriverConfigContract
   )
 
   buildErrorResponse(error)

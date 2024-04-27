@@ -37,13 +37,5 @@ export default abstract class BaseDriver {
     return [...Array(displayPages).keys()].map(i => i + 1 + offset)
   }
 
-  protected calculatedStart(currentPage, pageSize) {
-    return (currentPage - 1) * pageSize
-  }
-
-  protected calculatedEnd(currentPage, pageSize) {
-    return currentPage * pageSize
-  }
-
   public abstract get(currentPage, pageSize)
 }

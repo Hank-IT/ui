@@ -1,7 +1,4 @@
-export default class NotFoundException extends Error {
-  constructor(errors) {
-    super()
+import ResponseException from './ResponseException'
 
-    this.errors = errors
-  }
+export default class NotFoundException extends ResponseException {
 }

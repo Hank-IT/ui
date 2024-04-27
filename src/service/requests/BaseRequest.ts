@@ -2,7 +2,8 @@ import qs from 'qs'
 import type LoadingStateContract from './contracts/LoadingStateContract'
 import type RequestDriverContract from './contracts/RequestDriverContract'
 import type ContentContract from './contracts/ContentContract'
-import {ErrorHandler} from './ErrorHandler'
+import ErrorHandler from './ErrorHandler'
+import ResponseDto from './dtos/ResponseDto'
 
 export default abstract class BaseRequest {
     protected params = {}
@@ -101,7 +102,9 @@ export default abstract class BaseRequest {
         return undefined
     }
 
-    public getCorsWithCredentials(): Boolean {
+    public getCorsWithCredentials(): boolean {
         return undefined
     }
+
+    public abstract getResponse()
 }

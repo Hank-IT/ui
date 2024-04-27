@@ -2,13 +2,13 @@ import {BaseRequest, BaseResponse } from '@hank-it/ui/service/requests'
 
 export class GetProductsRequestResponse extends BaseResponse {}
 
-export class GetProductsRequest extends BaseRequest implements GetProductsRequest {
+export class ServerErrorRequest extends BaseRequest implements ServerErrorRequest {
     method() {
         return 'GET'
     }
 
     url() {
-        return 'https://dummyjson.com/products/?delay=5000'
+        return 'https://dummyjson.com/http/500'
     }
 
     public getCorsWithCredentials(): boolean {
@@ -17,9 +17,5 @@ export class GetProductsRequest extends BaseRequest implements GetProductsReques
 
     protected getResponse() {
         return new GetProductsRequestResponse
-    }
-
-    setSignal(signal): void {
-        this.signal = signal
     }
 }

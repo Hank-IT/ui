@@ -2,44 +2,40 @@ import type RequestDriverContract from '../contracts/RequestDriverContract'
 import type ContentContract from '../contracts/ContentContract'
 import ResponseError from '../dtos/ResponseError'
 import ResponseDto from '../dtos/ResponseDto'
+import DriverConfigContract from '../contracts/DriverConfigContract'
+import {getCookie} from '../../helpers'
+import NoResponseReceivedError from '../dtos/NoResponseReceivedError'
 
 export default class FetchDriver implements RequestDriverContract {
-    public constructor(protected corsWithCredentials: boolean = false) {}
+    public constructor(protected config: DriverConfigContract = undefined) {}
 
     public async send(
         url: string,
         method: string,
         headers: object,
         content: ContentContract,
-        corsWithCredentials = undefined,
-        abortSignal = undefined
+        requestConfig: DriverConfigContract
     ) {
-        const mergedHeaders = {
-            ...headers,
+        const mergedConfig = {
+            // Global config
+            ...this.config,
 
-            // ToDo: Make this configurable
-            'X-XSRF-Token': this.getCookie('XSRF-TOKEN')
+            // Request specific overrides
+            ...requestConfig,
 
-            // Don't include the content header, since the browser sets it
-            // automatically and it leads to "missing boundary" errors otherwise.
-            //...content?.getHeaders(),
-        }
-
-        const config = {
+            // Required config
             method: method,
-            headers: mergedHeaders,
-            credentials: this.getCorsWithCredentials(corsWithCredentials),
+            headers: {
+                ...headers,
+                'X-XSRF-Token': getCookie('XSRF-TOKEN')
+
+                // Don't include the content header, since the browser sets it
+                // automatically and it leads to "missing boundary" errors otherwise.
+                //...content?.getHeaders(),
+            }
         }
 
-        if (abortSignal) {
-            config.signal = abortSignal
-        }
-
-        if (!['GET', 'HEAD'].includes(method)) {
-            config.body = content?.getContent()
-        }
-
-        const response = await fetch(url, config)
+        const response = await fetch(url, this.buildRequestConfig(mergedConfig, content))
 
         if (! response.ok) {
             throw this.buildErrorResponse(response)
@@ -48,20 +44,25 @@ export default class FetchDriver implements RequestDriverContract {
         return new ResponseDto(response.json(), response.status, response)
     }
 
-    protected getCookie(cname) {
-        const name = cname + '='
-        const decodedCookie = decodeURIComponent(document.cookie)
-        const ca = decodedCookie.split(';')
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i]
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1)
-            }
-            if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length)
-            }
+
+    public buildErrorResponse(error) {
+        if (error.status) {
+            return new ResponseError(
+                error.status, error.headers, error.json(), error
+            )
         }
-        return ''
+
+        return new NoResponseReceivedError(error)
+    }
+
+    protected buildRequestConfig(config, content): object {
+        return {
+            method: config.method,
+            headers: config.mergedHeaders,
+            credentials: this.getCorsWithCredentials(config.credentials),
+            signal: config.abortSignal ? config.abortSignal: undefined,
+            body: ['GET', 'HEAD'].includes(config.method) ? undefined: content?.getContent()
+        }
     }
 
     protected getCorsWithCredentials(corsWithCredentials) {
@@ -72,18 +73,12 @@ export default class FetchDriver implements RequestDriverContract {
             return 'omit'
         }
 
-        // Fallback to default
-        return this.corsWithCredentials ? 'include': 'omit'
-    }
-
-    public buildErrorResponse(error) {
-        if (error.status) {
-            return new ResponseError(
-                error.status, error.headers, error.json(), error
-            )
-        } else {
-            // ToDo
-            console.log('Error', error);
+        // Fallback to default config
+        if (this.config) {
+            return this.config.corsWithCredentials ? 'include': 'omit'
         }
+
+        // Fallback to safe option if no default set
+        return 'omit'
     }
 }

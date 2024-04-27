@@ -7,9 +7,10 @@ const routes = [
         name: 'pagination',
     },
     {
-        path: '/requests',
+        path: '/requests/:component?',
         component: () => import('@view/requests/Requests.vue'),
         name: 'requests',
+        props: true,
     }
 ]
 

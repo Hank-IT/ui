@@ -1,7 +1,5 @@
-export default class PageExpiredException extends Error {
-    constructor(errors) {
-        super()
+import ResponseException from './ResponseException'
 
-        this.errors = errors
-    }
+export default class PageExpiredException extends ResponseException{
+
 }

@@ -3,7 +3,7 @@ import PaginationDataDto from '../dtos/PaginationDataDto'
 import PaginateableRequest from '../contracts/PaginateableRequest'
 import PaginationResponseContract from '../contracts/PaginationResponseContract'
 
-export class RequestDriver extends BaseDriver {
+export default class RequestDriver extends BaseDriver {
     public constructor(protected request: PaginateableRequest) {
         super()
     }

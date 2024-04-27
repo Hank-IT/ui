@@ -44,7 +44,7 @@ export class GetProductsRequest extends BaseRequest implements Paginatable {
         })
     }
 
-    public getCorsWithCredentials(): Boolean {
+    public getCorsWithCredentials(): boolean {
         return false
     }
 
