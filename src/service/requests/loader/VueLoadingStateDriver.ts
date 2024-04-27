@@ -1,4 +1,4 @@
-import { Ref, ref } from 'vue'
+import { type Ref, ref } from 'vue'
 import type LoadingStateContract from '../contracts/LoadingStateContract'
 
 export default class VueLoadingState implements LoadingStateContract {

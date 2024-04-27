@@ -1,4 +1,4 @@
-export abstract class BaseDriver {
+export default abstract class BaseDriver {
   public start(currentPage, pageSize) {
     return this.calculatedStart(currentPage, pageSize) + 1
   }

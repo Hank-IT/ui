@@ -1,4 +1,4 @@
-export class ResponseError {
+export default class ResponseError {
     protected statusCode: number
 
     constructor(

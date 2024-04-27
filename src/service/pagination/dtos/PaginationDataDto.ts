@@ -1,4 +1,4 @@
-export class PaginationDataDto {
+export default class PaginationDataDto {
   public constructor(data, total) {
     this.data = data
 

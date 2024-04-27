@@ -1,4 +1,4 @@
-import LoadingStateContract from '../contracts/LoadingStateContract.ts'
+import LoadingStateContract from '../contracts/LoadingStateContract'
 import VueLoadingState from '../loader/VueLoadingStateDriver'
 
 export default class VueLoaderDriverFactory {

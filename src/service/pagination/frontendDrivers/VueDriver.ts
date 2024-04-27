@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 
-export class VueDriver {
+export default class VueDriver {
   protected data: Ref<array>
   protected internalCurrentPageRef: Ref<number>
   protected internalPageSizeRef: Ref<number>

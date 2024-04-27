@@ -1,4 +1,4 @@
-import ContentContract from "./ContentContract"
+import ContentContract from './ContentContract'
 
 export default interface RequestDriverContract {
   send(

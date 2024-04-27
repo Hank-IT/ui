@@ -1,4 +1,4 @@
-export class Paginator {
+export default class Paginator {
   public constructor(
     dataDriver,
     frontendDriver,

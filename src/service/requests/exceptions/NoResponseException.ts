@@ -1,4 +1,4 @@
-export class NoResponseException extends Error {
+export default class NoResponseException extends Error {
     constructor(errors) {
         super()
 

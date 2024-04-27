@@ -1,5 +1,5 @@
-import {BaseDriver} from "./BaseDriver";
-import { PaginationDataDto } from '../dtos/PaginationDataDto'
+import PaginationDataDto from '../dtos/PaginationDataDto'
+import BaseDriver from './BaseDriver'
 
 export class ArrayDriver extends BaseDriver {
   public constructor(data) {

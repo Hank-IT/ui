@@ -1,4 +1,4 @@
-import type ResponseContract from "../contracts/ResponseContract"
+import type ResponseContract from '../contracts/ResponseContract'
 
 export default class BaseResponse implements ResponseContract {
     protected bodyPromise: Promise

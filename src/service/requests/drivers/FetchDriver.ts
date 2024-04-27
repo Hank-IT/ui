@@ -1,7 +1,7 @@
-import type RequestDriverContract from '@/service/requests/contracts/RequestDriverContract'
-import type ContentContract from '@/service/requests/contracts/ContentContract'
-import {ResponseError} from "../dtos/ResponseError";
-import ResponseDto from "../dtos/ResponseDto";
+import type RequestDriverContract from '../contracts/RequestDriverContract'
+import type ContentContract from '../contracts/ContentContract'
+import ResponseError from '../dtos/ResponseError'
+import ResponseDto from '../dtos/ResponseDto'
 
 export default class FetchDriver implements RequestDriverContract {
     public constructor(protected corsWithCredentials: boolean = false) {}

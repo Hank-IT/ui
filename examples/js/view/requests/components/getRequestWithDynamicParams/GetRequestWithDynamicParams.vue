@@ -18,7 +18,7 @@
 import {ref, computed} from "vue";
 import VueLoaderDriverFactory from "../../../../../../src/service/requests/factories/VueLoaderDriverFactory";
 import {BaseRequest, FetchDriver} from "../../../../../../src/service/requests";
-import {GetProductsRequest, GetProductsRequestResponse} from "./GetProductsRequest";
+import {GetProductsRequest} from "./GetProductsRequest";
 
 /* Booting */
 BaseRequest.setRequestDriver(new FetchDriver(true))

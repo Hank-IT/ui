@@ -1,4 +1,4 @@
-import ContentContract from "../contracts/ContentContract"
+import ContentContract from '../contracts/ContentContract'
 
 export default class FormDataContent implements ContentContract {
   protected data: object = {}

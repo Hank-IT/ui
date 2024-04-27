@@ -1,8 +1,8 @@
-import {ValidationException} from "./ValidationException"
-import {NotFoundException} from "./NotFoundException.ts"
-import {NoResponseException} from "./NoResponseException.ts"
-import {UnauthorizedException} from "./UnauthorizedException.ts"
-import {PageExpiredException} from "./PageExpiredException"
+import ValidationException from './ValidationException'
+import NotFoundException from './NotFoundException'
+import NoResponseException from './NoResponseException'
+import UnauthorizedException from './UnauthorizedException'
+import PageExpiredException from './PageExpiredException'
 
 export {
     ValidationException,

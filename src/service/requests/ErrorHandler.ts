@@ -1,9 +1,10 @@
-import {NoResponseReceivedError} from "./dtos/NoResponseReceivedError";
-import {RequestError} from "./dtos/RequestError";
-import {ResponseError} from "./dtos/ResponseError";
-import {PageExpiredException, ValidationException} from "./exceptions";
-import {NotFoundException} from "./exceptions";
-import {UnauthorizedException} from "./exceptions";
+import NoResponseReceivedError from './dtos/NoResponseReceivedError'
+import RequestError from './dtos/RequestError'
+import ResponseError from './dtos/ResponseError'
+import PageExpiredException from './exceptions/PageExpiredException'
+import NotFoundException from './exceptions/NotFoundException'
+import UnauthorizedException from './exceptions/UnauthorizedException'
+import ValidationException from './exceptions/ValidationException'
 
 export class ErrorHandler {
     protected error: NoResponseReceivedError|RequestError|ResponseError

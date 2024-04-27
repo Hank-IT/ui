@@ -1,4 +1,4 @@
-export class UnauthorizedException extends Error {
+export default class UnauthorizedException extends Error {
   constructor(errors) {
     super()
 

@@ -1,4 +1,4 @@
-export class PageExpiredException extends Error {
+export default class PageExpiredException extends Error {
     constructor(errors) {
         super()
 

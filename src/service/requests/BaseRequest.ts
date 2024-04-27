@@ -1,10 +1,10 @@
 import qs from 'qs'
-import type LoadingStateContract from "./contracts/LoadingStateContract"
-import type RequestDriverContract from "./contracts/RequestDriverContract"
-import type ContentContract from "./contracts/ContentContract"
-import {ErrorHandler} from "./ErrorHandler";
+import type LoadingStateContract from './contracts/LoadingStateContract'
+import type RequestDriverContract from './contracts/RequestDriverContract'
+import type ContentContract from './contracts/ContentContract'
+import {ErrorHandler} from './ErrorHandler'
 
-export abstract class BaseRequest {
+export default abstract class BaseRequest {
     protected params = {}
     protected content: ContentContract
     public loadingStateDriver: LoadingStateContract = undefined
