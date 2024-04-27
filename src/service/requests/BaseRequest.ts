@@ -4,22 +4,25 @@ import type RequestDriverContract from './contracts/RequestDriverContract'
 import type ContentContract from './contracts/ContentContract'
 import ErrorHandler from './ErrorHandler'
 import ResponseDto from './dtos/ResponseDto'
+import DriverConfigContract from './contracts/DriverConfigContract'
 
 export default abstract class BaseRequest {
     protected params = {}
     protected content: ContentContract
     public loadingStateDriver: LoadingStateContract = undefined
-    protected signal = undefined
+    protected driverConfig = {}
 
     protected static defaultBaseUrl: string
 
     protected static requestDriver: RequestDriverContract
     protected static loaderStateFactory: ViewLoaderFactoryContract
 
-    public constructor() {
+    protected constructor(config: DriverConfigContract) {
         if (BaseRequest.loaderStateFactory !== undefined) {
             this.loadingStateDriver = BaseRequest.loaderStateFactory.make()
         }
+
+        this.driverConfig = config
     }
 
     public static setRequestDriver(driver: RequestDriverContract) {
@@ -71,6 +74,11 @@ export default abstract class BaseRequest {
     }
 
     public send() {
+        const mergedConfig = {
+            ...this.driverConfig,
+            ...this.getConfig(),
+        }
+
         this.loadingStateDriver?.setLoading(true)
 
         return BaseRequest.requestDriver.send(
@@ -78,8 +86,7 @@ export default abstract class BaseRequest {
             this.method(),
             this.headers(),
             this.content,
-            this.getCorsWithCredentials(),
-            this.signal,
+            mergedConfig,
         ).then((responseDto: ResponseDto) => {
             const response = this.getResponse()
 
@@ -102,9 +109,9 @@ export default abstract class BaseRequest {
         return undefined
     }
 
-    public getCorsWithCredentials(): boolean {
-        return undefined
-    }
-
     public abstract getResponse()
+
+    protected getConfig(): obj {
+        return {}
+    }
 }

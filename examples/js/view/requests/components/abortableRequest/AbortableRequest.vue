@@ -22,9 +22,9 @@ const controller = new AbortController();
 
 const data = ref({})
 
-const request = new GetProductsRequest()
-
-request.setSignal(controller.signal)
+const request = new GetProductsRequest({
+    abortSignal: controller.signal,
+})
 
 function sendRequest() {
     request.send().then(response => {

@@ -21,7 +21,7 @@ import {GetProductsRequest} from './GetProductsRequest'
 
 /* Booting */
 BaseRequest.setRequestDriver(new FetchDriver({
-    corsWithCredentials: false,
+    corsWithCredentials: true,
 }))
 BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
 
@@ -41,7 +41,7 @@ const search = computed({
 
 const data = ref({})
 
-const request = new GetProductsRequest()
+const request = new GetProductsRequest
 
 function sendRequest() {
     request.setParams({

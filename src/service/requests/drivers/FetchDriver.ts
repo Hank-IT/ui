@@ -59,7 +59,7 @@ export default class FetchDriver implements RequestDriverContract {
         return {
             method: config.method,
             headers: config.mergedHeaders,
-            credentials: this.getCorsWithCredentials(config.credentials),
+            credentials: this.getCorsWithCredentials(config.corsWithCredentials),
             signal: config.abortSignal ? config.abortSignal: undefined,
             body: ['GET', 'HEAD'].includes(config.method) ? undefined: content?.getContent()
         }

@@ -1,4 +1,5 @@
 import {BaseRequest, BaseResponse } from '@hank-it/ui/service/requests'
+import DriverConfigContract from '../../../../../../src/service/requests/contracts/DriverConfigContract'
 
 export class GetProductsRequestResponse extends BaseResponse {}
 
@@ -11,15 +12,13 @@ export class GetProductsRequest extends BaseRequest implements GetProductsReques
         return 'https://dummyjson.com/products/?delay=5000'
     }
 
-    public getCorsWithCredentials(): boolean {
-        return false
+    protected getConfig(): DriverConfigContract {
+        return {
+            corsWithCredentials: true,
+        }
     }
 
     protected getResponse() {
         return new GetProductsRequestResponse
-    }
-
-    setSignal(signal): void {
-        this.signal = signal
     }
 }

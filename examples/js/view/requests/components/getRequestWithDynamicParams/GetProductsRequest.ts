@@ -1,4 +1,5 @@
 import {BaseRequest, type Paginatable, BaseResponse } from '@hank-it/ui/service/requests'
+import DriverConfigContract from '../../../../../../src/service/requests/contracts/DriverConfigContract'
 
 export class GetProductsRequestResponse extends BaseResponse {
     public dataHandler(data) {
@@ -22,8 +23,10 @@ export class GetProductsRequest extends BaseRequest implements Paginatable {
         })
     }
 
-    public getCorsWithCredentials(): boolean {
-        return false
+    protected getConfig(): DriverConfigContract {
+        return {
+            corsWithCredentials: false,
+        }
     }
 
     protected getResponse() {
