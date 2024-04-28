@@ -14,7 +14,7 @@ export class GetProductsRequest extends BaseRequest implements GetProductsReques
 
     protected getConfig(): DriverConfigContract {
         return {
-            corsWithCredentials: true,
+            corsWithCredentials: false,
         }
     }
 

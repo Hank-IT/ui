@@ -2,9 +2,10 @@ import { createWebHistory, createRouter } from 'vue-router'
 
 const routes = [
     {
-        path: '/pagination',
+        path: '/pagination/:component?',
         component: () => import('@view/pagination/Pagination.vue'),
         name: 'pagination',
+        props: true,
     },
     {
         path: '/requests/:component?',

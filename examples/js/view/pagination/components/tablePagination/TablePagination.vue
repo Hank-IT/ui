@@ -28,14 +28,11 @@
 </template>
 
 <script setup lang="ts">
-import {BaseRequest} from "../../../../../../src/service/requests"
-import {FetchDriver} from "../../../../../../src/service/requests"
 import {GetProductsRequest} from "./GetProductsRequest";
-import {Paginator, RequestDriver} from "../../../../../../src/service/pagination";
-import {VueLoaderDriverFactory} from '@hank-it/ui/service/pagination'
-import VuePaginationDriverFactory from '../../../../../../src/service/pagination/factories/VuePaginationDriverFactory'
+import {Paginator, RequestDriver, VuePaginationDriverFactory} from '@hank-it/ui/service/pagination'
+import {VueLoaderDriverFactory, BaseRequest, FetchDriver} from '@hank-it/ui/service/requests'
 import {computed} from 'vue'
-import {getDisplayablePages} from '../../../../../../src/service/helpers'
+import {getDisplayablePages} from '@hank-it/ui/service/helpers'
 
 /* Booting */
 BaseRequest.setRequestDriver(new FetchDriver(true))
@@ -64,7 +61,3 @@ const displayablePages = computed(() => {
     return getDisplayablePages(paginator.getPages().length, paginator.getCurrentPage())
 })
 </script>
-
-<style scoped>
-
-</style>

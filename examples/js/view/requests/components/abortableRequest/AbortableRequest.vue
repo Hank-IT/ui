@@ -14,7 +14,7 @@ import {VueLoaderDriverFactory, BaseRequest, FetchDriver} from '@hank-it/ui/serv
 import {GetProductsRequest} from './GetProductsRequest'
 
 /* Booting */
-BaseRequest.setRequestDriver(new FetchDriver(true))
+BaseRequest.setRequestDriver(new FetchDriver)
 BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
 
 /* Component */

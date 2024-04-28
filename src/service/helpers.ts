@@ -33,3 +33,7 @@ export const getDisplayablePages = (totalPages: number, pageNumber: number, disp
 
     return [...Array(displayPages).keys()].map(i => i + 1 + offset)
 }
+
+export const isAtBottom = (scrollHeight: number, scrollTop: number, clientHeight: number) => {
+    return Math.abs(scrollHeight - scrollTop - clientHeight) <= 3.0
+}
