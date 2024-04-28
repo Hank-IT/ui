@@ -6,6 +6,7 @@
 import GetRequestWithDynamicParams from './components/getRequestWithDynamicParams/GetRequestWithDynamicParams.vue'
 import AbortableRequest from './components/abortableRequest/AbortableRequest.vue'
 import ServerErrorRequest from './components/serverErrorRequest/ServerErrorRequest.vue'
+import FileDownloadRequest from './components/fileDownloadRequest/FileDownloadRequest.vue'
 import DemoPage from '../layout/DemoPage.vue'
 
 const components = {
@@ -23,6 +24,11 @@ const components = {
         name: 'Server error request',
         component: ServerErrorRequest,
         route: { name: 'requests', params: { component: 'server-error-request' } },
+    },
+    'file-download-request': {
+        name: 'File download request',
+        component: FileDownloadRequest,
+        route: { name: 'requests', params: { component: 'file-download-request' } },
     },
 }
 </script>

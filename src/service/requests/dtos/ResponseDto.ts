@@ -1,13 +1,10 @@
 export default class ResponseDto {
-    protected data: any
-    protected statusCode: number
-    protected response: object
-
-    public constructor(data: any, statusCode: number, response) {
-        this.data = data
-        this.statusCode = statusCode
-        this.response = response
-    }
+    public constructor(
+        protected data: any,
+        protected statusCode: number,
+        protected responseHeaders: object,
+        protected response
+    ) {}
 
     public getBodyPromise(): any {
         return this.data
@@ -19,5 +16,9 @@ export default class ResponseDto {
 
     public getResponse(): object {
         return this.response
+    }
+
+    public getResponseHeaders(): object {
+        return this.responseHeaders
     }
 }

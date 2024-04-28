@@ -27,7 +27,7 @@ const loadNextDebounced = debounce(event => {
 }, 100)
 
 /* Booting */
-BaseRequest.setRequestDriver(new FetchDriver(true))
+BaseRequest.setRequestDriver(new FetchDriver)
 BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
 Paginator.setViewDriverFactory(new VuePaginationDriverFactory())
 

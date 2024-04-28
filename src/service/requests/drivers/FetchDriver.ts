@@ -5,6 +5,7 @@ import ResponseDto from '../dtos/ResponseDto'
 import DriverConfigContract from '../contracts/DriverConfigContract'
 import {getCookie} from '../../helpers'
 import NoResponseReceivedError from '../dtos/NoResponseReceivedError'
+import BaseResponse from '../responses/BaseResponse'
 
 export default class FetchDriver implements RequestDriverContract {
     public constructor(protected config: DriverConfigContract = undefined) {}
@@ -14,6 +15,7 @@ export default class FetchDriver implements RequestDriverContract {
         method: string,
         headers: object,
         content: ContentContract,
+        responseSkeleton: BaseResponse,
         requestConfig: DriverConfigContract
     ) {
         const mergedConfig = {
@@ -41,9 +43,13 @@ export default class FetchDriver implements RequestDriverContract {
             throw this.buildErrorResponse(response)
         }
 
-        return new ResponseDto(response.json(), response.status, response)
+        return new ResponseDto(
+            responseSkeleton.getBodyPromiseFromResponse(response),
+            response.status,
+            response.headers,
+            response,
+        )
     }
-
 
     public buildErrorResponse(error) {
         if (error.status) {

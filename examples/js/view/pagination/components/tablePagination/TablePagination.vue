@@ -35,7 +35,7 @@ import {computed} from 'vue'
 import {getDisplayablePages} from '@hank-it/ui/service/helpers'
 
 /* Booting */
-BaseRequest.setRequestDriver(new FetchDriver(true))
+BaseRequest.setRequestDriver(new FetchDriver)
 BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
 Paginator.setViewDriverFactory(new VuePaginationDriverFactory())
 

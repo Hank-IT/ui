@@ -1,5 +1,6 @@
 import ContentContract from './ContentContract'
 import DriverConfigContract from './DriverConfigContract'
+import BaseResponse from '../responses/BaseResponse'
 
 export default interface RequestDriverContract {
   send(
@@ -7,6 +8,7 @@ export default interface RequestDriverContract {
     method: string,
     headers: object,
     content: ContentContract,
+    responseSkeleton: BaseResponse,
     requestConfig: DriverConfigContract
   )
 

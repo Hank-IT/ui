@@ -81,20 +81,22 @@ export default abstract class BaseRequest {
 
         this.loadingStateDriver?.setLoading(true)
 
+        const responseSkeleton = this.getResponse()
+
         return BaseRequest.requestDriver.send(
             this.buildUrl(),
             this.method(),
             this.headers(),
             this.content,
+            responseSkeleton,
             mergedConfig,
         ).then((responseDto: ResponseDto) => {
-            const response = this.getResponse()
+            responseSkeleton.setBodyPromise(responseDto.getBodyPromise())
+            responseSkeleton.setStatusCode(responseDto.getStatusCode())
+            responseSkeleton.setResponseHeaders(responseDto.getResponseHeaders())
+            responseSkeleton.setOriginalResponse(responseDto.getResponse())
 
-            response.setBodyPromise(responseDto.getBodyPromise())
-            response.setStatusCode(responseDto.getStatusCode())
-            response.setOriginalResponse(responseDto.getResponse())
-
-            return response.getBodyPromise()
+            return responseSkeleton.getBodyPromise()
         }).catch(error => new ErrorHandler(error))
           .finally(() => {
               this.loadingStateDriver?.setLoading(false)

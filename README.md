@@ -201,6 +201,5 @@ const pageSize = paginator.pageSize()
 ```
 
 ## ToDo
-- File responses (blob)
 - File upload progress handling
 - Update documentation

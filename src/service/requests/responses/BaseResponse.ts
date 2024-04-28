@@ -1,11 +1,12 @@
 import type ResponseContract from '../contracts/ResponseContract'
 
-export default class BaseResponse implements ResponseContract {
+export default abstract class BaseResponse implements ResponseContract {
     protected bodyPromise: Promise
     protected originalResponse: object = {}
     protected statusCode: number
     protected data
     protected body
+    protected responseHeaders
 
     public setStatusCode(value: number): void {
         this.statusCode = value
@@ -17,6 +18,10 @@ export default class BaseResponse implements ResponseContract {
 
     public setBodyPromise(promise) {
         this.bodyPromise = this.internalBodyHandler(promise)
+    }
+
+    public setResponseHeaders(headers) {
+        this.responseHeaders = headers
     }
 
     public getBodyPromise(): object {
@@ -59,9 +64,11 @@ export default class BaseResponse implements ResponseContract {
         return data
     }
 
-    public static getHeaders(): object {
-        return {
-            'Accept': 'application/json',
-        }
+    public getResponseHeaders(): object {
+        return this.responseHeaders
     }
+
+    public abstract getRequestHeaders(): object
+
+    public abstract getBodyPromiseFromResponse(response): Promise
 }
