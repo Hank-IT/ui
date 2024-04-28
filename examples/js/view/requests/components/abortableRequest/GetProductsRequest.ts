@@ -1,7 +1,8 @@
 import {BaseRequest, BaseResponse } from '@hank-it/ui/service/requests'
 import DriverConfigContract from '../../../../../../src/service/requests/contracts/DriverConfigContract'
+import JsonResponse from '../../../../../../src/service/requests/responses/JsonResponse'
 
-export class GetProductsRequestResponse extends BaseResponse {}
+export class GetProductsRequestResponse extends JsonResponse {}
 
 export class GetProductsRequest extends BaseRequest implements GetProductsRequest {
     method() {

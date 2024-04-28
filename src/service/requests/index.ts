@@ -7,6 +7,8 @@ import FetchDriver from './drivers/FetchDriver'
 import FormDataContent from './dtos/FormDataContent'
 import JsonContent from './dtos/JsonContent'
 import BaseResponse from './responses/BaseResponse'
+import JsonResponse from './responses/JsonResponse'
+import BlobResponse from './responses/BlobResponse'
 import VueLoadingStateDriver from './loader/VueLoadingStateDriver'
 import BaseRequest from './BaseRequest'
 import VueLoaderDriverFactory from './factories/VueLoaderDriverFactory'
@@ -21,6 +23,8 @@ export {
     FetchDriver,
     FormDataContent,
     BaseResponse,
+    JsonResponse,
+    BlobResponse,
     JsonContent,
     VueLoadingStateDriver,
     VueLoaderDriverFactory,

@@ -1,4 +1,4 @@
-import {BaseRequest, type Paginatable, BaseResponse } from '@hank-it/ui/service/requests'
+import {BaseRequest, type Paginatable, JsonResponse } from '@hank-it/ui/service/requests'
 import type {PaginationResponseContract} from '@hank-it/ui/service/pagination'
 
 export interface ProductResource {
@@ -14,7 +14,7 @@ export interface ProductPaginationResource {
     skip: number
 }
 
-export class GetProductsRequestResponse extends BaseResponse implements PaginationResponseContract {
+export class GetProductsRequestResponse extends JsonResponse implements PaginationResponseContract {
     public getData() {
         return this.data
     }

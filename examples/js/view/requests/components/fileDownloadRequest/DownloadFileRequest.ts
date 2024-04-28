@@ -1,6 +1,4 @@
-import {BaseRequest, BaseResponse } from '@hank-it/ui/service/requests'
-import BlobResponse from '../../../../../../src/service/requests/responses/BlobResponse'
-
+import {BaseRequest, BlobResponse } from '@hank-it/ui/service/requests'
 
 export default class DownloadFileRequest extends BaseRequest {
     method() {
@@ -12,6 +10,6 @@ export default class DownloadFileRequest extends BaseRequest {
     }
 
     protected getResponse() {
-        return new BlobResponse()
+        return new BlobResponse
     }
 }

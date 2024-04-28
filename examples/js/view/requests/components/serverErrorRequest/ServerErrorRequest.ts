@@ -1,6 +1,6 @@
-import {BaseRequest, BaseResponse } from '@hank-it/ui/service/requests'
+import {BaseRequest, JsonResponse } from '@hank-it/ui/service/requests'
 
-export class GetProductsRequestResponse extends BaseResponse {}
+export class GetProductsRequestResponse extends JsonResponse {}
 
 export class ServerErrorRequest extends BaseRequest implements ServerErrorRequest {
     method() {

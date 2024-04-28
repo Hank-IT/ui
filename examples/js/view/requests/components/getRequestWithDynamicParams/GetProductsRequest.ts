@@ -1,7 +1,6 @@
-import {BaseRequest, type Paginatable, BaseResponse } from '@hank-it/ui/service/requests'
-import DriverConfigContract from '../../../../../../src/service/requests/contracts/DriverConfigContract'
+import {BaseRequest, type Paginatable, type DriverConfigContract, JsonResponse } from '@hank-it/ui/service/requests'
 
-export class GetProductsRequestResponse extends BaseResponse {
+export class GetProductsRequestResponse extends JsonResponse {
     public dataHandler(data) {
         return data.products
     }
