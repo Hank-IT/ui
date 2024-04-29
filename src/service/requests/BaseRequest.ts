@@ -70,7 +70,7 @@ export default abstract class BaseRequest {
             ? this.url()
             : this.url() + '?' + qs.stringify(this.params)
 
-        return new URL(url, this.baseUrl() ?? this.defaultBaseUrl)
+        return new URL(url, this.baseUrl() ?? BaseRequest.defaultBaseUrl)
     }
 
     public send() {
