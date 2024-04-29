@@ -1,12 +1,8 @@
 # Requirements
 While this library can be used with any frontend, it includes Vue 3 support out of box and assumes the usage of Vue 3 in the documentation.
 
-# Assumptions
- - This library expects data to be returned as json.
- - Validation errors return status code 422.
-
 ## Requests
-This library supports fetch. Select your preferred client while bootstraping your application:
+This library supports fetch as a driver to make requests.
 
 ## Request driver
 
@@ -19,14 +15,16 @@ BaseRequest.setRequestDriver(new FetchDriver)
 
 You may enable credential support using:
 ``` typescript
-BaseRequest.setRequestDriver(new FetchDriver(true))
+BaseRequest.setRequestDriver(new FetchDriver({
+    corsWithCredentials: true
+}))
 ```
 
 ## Defining requests
 Each requests requires its own class:
 
 ``` typescript
-import { BaseRequest, type ResponseContract } from '@hank-it/ui/service/requests'
+import { BaseRequest, type ResponseContract, JsonResponse } from '@hank-it/ui/service/requests'
 
 export class GetCustomersRequest extends BaseRequest {
   method(): string {
@@ -36,12 +34,31 @@ export class GetCustomersRequest extends BaseRequest {
   url(): string {
     return '/api/v1/customers'
   }
+  
+  protected getResponse() {
+        return new JsonResponse
+  }
 }
 ```
 
 ### Defining paginatable requests
 ``` typescript
-import { BaseRequest, type PaginatableRequest, type ResponseContract } from '@hank-it/ui/service/requests'
+import { BaseRequest, type PaginatableRequest, type ResponseContract, JsonResponse } from '@hank-it/ui/service/requests'
+import type {PaginationResponseContract} from '@hank-it/ui/service/pagination'
+
+export class GetProductsRequestResponse extends JsonResponse implements PaginationResponseContract {
+    public getData() {
+        return this.data
+    }
+
+    public getTotal(): number {
+        return this.body.total
+    }
+
+    public dataHandler(data) {
+        return data.products
+    }
+}
 
 export class GetCustomersRequest extends BaseRequest implements PaginatableRequest {
   method(): string {
@@ -49,17 +66,18 @@ export class GetCustomersRequest extends BaseRequest implements PaginatableReque
   }
 
   url(): string {
-    return '/api/v1/customers'
+     return 'https://dummyjson.com/products'
   }
   
-  // Used to retrieve the page data from the response
-  getPage(data: object): object {
-    return data.data
+  public setPaginationParams(page: number, size: number): BaseRequest {
+      return this.withParams({
+          skip: (page - 1) * size,
+          limit: size,
+      })
   }
-
-  // Used to retrieve the total number of items from the response
-  getTotal(data: object): number {
-    return data.meta.total
+  
+  protected getResponse() {
+     return new GetProductsRequestResponse
   }
 }
 ```
@@ -80,14 +98,9 @@ You may also access the raw response or the status code:
 ``` typescript
 new GetCustomersRequest()
     .send()
-    .then((result: ResponseContract) => {
-        // result.getRaw()
-        // result.getStatusCode()
-        
-        return result.getBodyPromise()
-    })
-    .then(data => {
-        // Do something with data
+    .then(response => {
+        response.data // Data converted by the response class
+        response.body // Data before being converted by the response class
     })
 ```
 
@@ -100,7 +113,7 @@ const content = new JsonContent({
 })
 
 new UserLoginRequest()
-  .setData(content)
+  .setBody(content)
   .send()
   .then(result: ResponseContract => {
     // Do something with result
@@ -118,7 +131,7 @@ function submit() {
   })
 
   new UploadInboxItemRequest()
-    .setData(content)
+    .setBody(content)
     .send()
     .then(result: ResponseContract => {
        // Do something with result
@@ -144,28 +157,15 @@ const rows = [
   }
 ]
 
-// Create data driver and give our data
-const dataDriver = new ArrayDriver(rows)
+// Botting
+BaseRequest.setRequestDriver(new FetchDriver)
+BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
+Paginator.setViewDriverFactory(new VuePaginationDriverFactory)
 
-// Create frontend driver and give initial  
-// values for currentpage and pageSize
-const frontendDriver = new VuePaginationDriver(1, 2)
-
-const paginator = new Paginator(dataDriver, frontendDriver)
+const paginator = new Paginator(new ArrayDriver(rows))
 
 // Make the paginator prepare the first page 
-paginator.init()
-
-// All these methods return Vue 3 refs (or whatever is defined in the provided frontendDriver)
-// and can be used directly in your template. You may also update these refs and 
-// the required changes are done automatically behind the scenes.
-const currentPage = paginator.currentPage()
-const start = paginator.start()
-const end = paginator.end()
-const totalPages = paginator.totalPages()
-const pageData = paginator.currentPageData()
-const total = paginator.total()
-const pageSize = paginator.pageSize()
+paginator.init(1, 10)
 ```
 
 ## Pagination with Request source
@@ -176,29 +176,8 @@ You may use any request that implements the ``PaginatableRequest`` interface as 
 // implement the "PaginatableRequest" interface for this to work.
 const getInboxItemsRequest = new GetInboxItemsRequest
 
-// Create the data driver and provide our paginatable request
-const dataDriver = new RequestDriver(getInboxItemsRequest)
-
-// Create frontend driver and give initial  
-// values for currentpage and pageSize
-const frontendDriver = new VuePaginationDriver(1, 2)
-
-const paginator = new Paginator(dataDriver, frontendDriver)
+const paginator = new Paginator( new RequestDriver(getInboxItemsRequest))
 
 // Make the paginator prepare the first page 
-paginator.init()
-
-// All these methods return Vue 3 refs (or whatever is defined in the provided frontendDriver)
-// and can be used directly in your template. You may also update these refs and 
-// the required changes are done automatically behind the scenes.
-const currentPage = paginator.currentPage()
-const start = paginator.start()
-const end = paginator.end()
-const totalPages = paginator.totalPages()
-const pageData = paginator.currentPageData()
-const total = paginator.total()
-const pageSize = paginator.pageSize()
+paginator.init(1, 10)
 ```
-
-## ToDo
-- Update documentation
