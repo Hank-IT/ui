@@ -11,12 +11,12 @@ export default class FetchDriver implements RequestDriverContract {
     public constructor(protected config: DriverConfigContract = undefined) {}
 
     public async send(
-        url: string,
-        method: string,
-        headers: object,
-        content: ContentContract,
-        responseSkeleton: BaseResponse,
-        requestConfig: DriverConfigContract
+      url: string,
+      method: string,
+      headers: object,
+      content: ContentContract,
+      responseSkeleton: BaseResponse,
+      requestConfig: DriverConfigContract
     ) {
         const mergedConfig = {
             // Global config
@@ -29,11 +29,14 @@ export default class FetchDriver implements RequestDriverContract {
             method: method,
             headers: {
                 ...headers,
-                'X-XSRF-Token': getCookie('XSRF-TOKEN')
+                // ToDo: This should probably be extracted and configurable
+                'X-XSRF-Token': getCookie('XSRF-TOKEN'),
 
-                // Don't include the content header, since the browser sets it
-                // automatically and it leads to "missing boundary" errors otherwise.
-                //...content?.getHeaders(),
+                // Set Content-Type header
+                ...content?.getHeaders(),
+
+                // Set Accept header
+                ...responseSkeleton.getRequestHeaders(),
             }
         }
 
@@ -44,17 +47,17 @@ export default class FetchDriver implements RequestDriverContract {
         }
 
         return new ResponseDto(
-            responseSkeleton.getBodyPromiseFromResponse(response),
-            response.status,
-            response.headers,
-            response,
+          responseSkeleton.getBodyPromiseFromResponse(response),
+          response.status,
+          response.headers,
+          response,
         )
     }
 
     public buildErrorResponse(error) {
         if (error.status) {
             return new ResponseError(
-                error.status, error.headers, error.json(), error
+              error.status, error.headers, error.json(), error
             )
         }
 
@@ -64,7 +67,7 @@ export default class FetchDriver implements RequestDriverContract {
     protected buildRequestConfig(config, content): object {
         return {
             method: config.method,
-            headers: config.mergedHeaders,
+            headers: config.headers,
             credentials: this.getCorsWithCredentials(config.corsWithCredentials),
             signal: config.abortSignal ? config.abortSignal: undefined,
             body: ['GET', 'HEAD'].includes(config.method) ? undefined: content?.getContent()

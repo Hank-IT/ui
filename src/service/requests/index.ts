@@ -8,6 +8,7 @@ import FormDataContent from './dtos/FormDataContent'
 import JsonContent from './dtos/JsonContent'
 import BaseResponse from './responses/BaseResponse'
 import JsonResponse from './responses/JsonResponse'
+import PlainTextResponse from './responses/PlainTextResponse'
 import BlobResponse from './responses/BlobResponse'
 import VueLoadingStateDriver from './loader/VueLoadingStateDriver'
 import BaseRequest from './BaseRequest'
@@ -25,6 +26,7 @@ export {
     BaseResponse,
     JsonResponse,
     BlobResponse,
+    PlainTextResponse,
     JsonContent,
     VueLoadingStateDriver,
     VueLoaderDriverFactory,
