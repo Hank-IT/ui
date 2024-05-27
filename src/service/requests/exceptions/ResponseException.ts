@@ -1,11 +1,6 @@
 import ResponseError from '../dtos/ResponseError'
+import RequestBaseException from './RequestBaseException'
 
-export default class ResponseException extends Error {
-    constructor(protected error: ResponseError) {
-        super()
-    }
-
-    public getError(): ResponseError {
-        return this.error
-    }
+export default class ResponseException extends RequestBaseException {
+    constructor(protected error: ResponseError) {}
 }

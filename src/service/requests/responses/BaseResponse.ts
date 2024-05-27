@@ -46,7 +46,7 @@ export default abstract class BaseResponse implements ResponseContract {
     /**
      * Body is the full response payload.
      */
-    public getBody() {
+    public getBody(): any {
         return this.body
     }
 
@@ -60,8 +60,8 @@ export default abstract class BaseResponse implements ResponseContract {
         })
     }
 
-    public dataHandler(data) {
-        return data
+    public dataHandler(body): any {
+        return body
     }
 
     public getResponseHeaders(): object {

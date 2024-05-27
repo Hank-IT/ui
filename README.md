@@ -36,7 +36,41 @@ export class GetCustomersRequest extends BaseRequest {
   }
   
   protected getResponse() {
-        return new JsonResponse
+    return new JsonResponse
+  }
+}
+```
+
+## Requests with data handler and typed response
+Each requests requires its own class:
+
+``` typescript
+import { BaseRequest, JsonResponse } from '@hank-it/ui/service/requests'
+
+export interface CustomerResource {
+  id: string,
+  first_name: string,
+  last_name: string,
+  email: string,
+}
+
+export class GetCustomersResponse extends JsonResponse {
+  public dataHandler(body): CustomerResource[] {
+    return body.data
+  }
+}
+
+export class GetCustomersRequest extends BaseRequest {
+  method(): string {
+    return 'GET'
+  }
+
+  url(): string {
+    return '/api/v1/customers'
+  }
+  
+  protected getResponse() {
+    return new GetCustomersResponse
   }
 }
 ```
@@ -47,16 +81,12 @@ import { BaseRequest, type PaginatableRequest, type ResponseContract, JsonRespon
 import type {PaginationResponseContract} from '@hank-it/ui/service/pagination'
 
 export class GetProductsRequestResponse extends JsonResponse implements PaginationResponseContract {
-    public getData() {
-        return this.data
-    }
-
     public getTotal(): number {
         return this.body.total
     }
 
-    public dataHandler(data) {
-        return data.products
+    public dataHandler(body) {
+        return body.products
     }
 }
 
@@ -86,11 +116,17 @@ export class GetCustomersRequest extends BaseRequest implements PaginatableReque
 
 #### Generic get request
 ``` typescript
+import { RequestBaseException } from '@hank-it/ui/service/requests/exceptions'
+
 new GetCustomersRequest()
     .send()
-    .then(result => result.getBodyPromise())
     .then(data => {
         // Do something with data
+    })
+    .catch((exception: RequestBaseException) => {
+        exception.getError().getBodyPromise().then(bodyContent => {
+            // errors are in bodyContent
+        })
     })
 ```
 
@@ -99,8 +135,8 @@ You may also access the raw response or the status code:
 new GetCustomersRequest()
     .send()
     .then(response => {
-        response.data // Data converted by the response class
-        response.body // Data before being converted by the response class
+        response.getData() // Data converted by the response class
+        response.getBody() // Data before being converted by the response class
     })
 ```
 
@@ -116,6 +152,47 @@ new UserLoginRequest()
   .setBody(content)
   .send()
   .then(result: ResponseContract => {
+    // Do something with result
+  })
+```
+
+#### Posting json data with typescript
+``` typescript
+import { BaseRequest, JsonResponse } from '@hank-it/ui/service/requests'
+
+export interface AuthPayload {
+  username: string,
+  password: string,
+}
+
+export class AuthJsonContent extends JsonContent {
+  public constructor(protected data: AuthPayload) {}
+}
+
+export class UserLoginRequest extends BaseRequest {
+  method(): string {
+    return 'POST'
+  }
+
+  url(): string {
+    return '/api/v1/login'
+  }
+
+  public getResponse() {
+    return new JsonResponse
+  }
+}
+
+// This is the json content for the request
+const content = new AuthJsonContent({
+  username: "username",
+  password: "password",
+})
+
+new UserLoginRequest()
+  .setBody(content)
+  .send()
+  .then(result => {
     // Do something with result
   })
 ```
@@ -157,7 +234,7 @@ const rows = [
   }
 ]
 
-// Botting
+// Booting
 BaseRequest.setRequestDriver(new FetchDriver)
 BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
 Paginator.setViewDriverFactory(new VuePaginationDriverFactory)
