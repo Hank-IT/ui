@@ -29,21 +29,15 @@ export default class Paginator {
     return this.loadData(this.getCurrentPage(), this.getPageSize())
   }
 
-  public refresh(pageNumber: number = undefined): void {
+  public refresh(pageNumber: number = undefined, clear: boolean = false): Promise {
     if (pageNumber) {
-      this.setPage(pageNumber)
-
-      return
+      return this.setPage(pageNumber, clear)
     }
 
-    this.loadData(this.getCurrentPage(), this.getPageSize())
+    return this.loadData(this.getCurrentPage(), this.getPageSize(), clear)
   }
 
-  public setPage(pageNumber: number, clear: boolean = true): void {
-    if (pageNumber <= 0 || pageNumber > this.getPages().length) {
-      return
-    }
-
+  public setPage(pageNumber: number, clear: boolean = false): Promise {
     this.viewDriver.setPage(pageNumber)
 
     return this.loadData(this.viewDriver.getCurrentPage(), this.viewDriver.getPageSize(), clear)
@@ -109,7 +103,11 @@ export default class Paginator {
     return this.viewDriver.getPages()
   }
 
-  protected loadData(pageNumber: number, pageSize: number): void {
+  protected loadData(pageNumber: number, pageSize: number, clear: boolean = true): void {
+    if (clear) {
+      this.viewDriver.setData([])
+    }
+
     return this.dataDriver.get(pageNumber, pageSize)
         .then((dto: PaginationDataDto) => {
           this.viewDriver.setData(dto.getData())

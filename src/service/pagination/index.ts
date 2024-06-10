@@ -7,6 +7,7 @@ import InfiniteScroller from './InfiniteScroller'
 import BaseDriver from './dataDrivers/BaseDriver'
 import PaginationResponseContract from './contracts/PaginationResponseContract'
 import VuePaginationDriverFactory from './factories/VuePaginationDriverFactory'
+import {getDisplayablePages} from '../helpers'
 
 export {
     ArrayDriver,
@@ -17,6 +18,7 @@ export {
     Paginator,
     InfiniteScroller,
     VuePaginationDriverFactory,
+    getDisplayablePages,
 }
 
 export type {
