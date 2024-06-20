@@ -1,21 +1,24 @@
 import { nextTick, watch } from 'vue'
 
 export default function(props, options = {}) {
-    const {
-        name = 'modelValue',
-    } = options
+  const {
+    name = 'modelValue',
+    closeCallback = () => {}
+  } = options
 
-    function onOpen(callback) {
-        watch(() => props[name], () => {
-            nextTick(() => {
-                if (props[name]) {
-                    callback()
-                }
-            })
-        })
-    }
+  function onOpen(callback) {
+    watch(() => props[name], () => {
+      nextTick(() => {
+        if (props[name]) {
+          callback()
+        } else {
+            closeCallback()
+        }
+      })
+    })
+  }
 
-    return {
-        onOpen
-    }
+  return {
+    onOpen
+  }
 }

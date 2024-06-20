@@ -1,10 +1,7 @@
 import { ref, computed } from 'vue'
-import useHelper from './useHelper.js'
 
 export default function(defaultValue = null, delay = 500) {
     const isOpenFromVarKey = ref(0)
-
-    const { isNotEmpty } = useHelper()
 
     const internalIsOpen = ref(false)
 
@@ -36,7 +33,7 @@ export default function(defaultValue = null, delay = 500) {
             return internalFromVar.value
         },
         set(value) {
-            if (isNotEmpty(value)) {
+            if (value) {
                 isOpenFromVar.value = true
 
                 internalFromVar.value = value
