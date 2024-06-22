@@ -3,7 +3,7 @@ import type ContentContract from '../contracts/ContentContract'
 import ResponseError from '../dtos/ResponseError'
 import ResponseDto from '../dtos/ResponseDto'
 import DriverConfigContract from '../contracts/DriverConfigContract'
-import {getCookie} from '../../helpers'
+import {getCookie} from '../../../helpers'
 import NoResponseReceivedError from '../dtos/NoResponseReceivedError'
 import BaseResponse from '../responses/BaseResponse'
 

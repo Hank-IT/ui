@@ -37,6 +37,10 @@ export default class Paginator {
     return this.loadData(this.getCurrentPage(), this.getPageSize(), clear)
   }
 
+  public flush(): void {
+    this.viewDriver.setData([])
+  }
+
   public setPage(pageNumber: number, clear: boolean = false): Promise {
     this.viewDriver.setPage(pageNumber)
 

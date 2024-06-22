@@ -3,7 +3,6 @@ import { nextTick, watch } from 'vue'
 export default function(props, options = {}) {
   const {
     name = 'modelValue',
-    closeCallback = () => {}
   } = options
 
   function onOpen(callback) {
@@ -11,8 +10,6 @@ export default function(props, options = {}) {
       nextTick(() => {
         if (props[name]) {
           callback()
-        } else {
-            closeCallback()
         }
       })
     })
