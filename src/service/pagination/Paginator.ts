@@ -29,22 +29,24 @@ export default class Paginator {
     return this.loadData(this.getCurrentPage(), this.getPageSize())
   }
 
-  public refresh(pageNumber: number = undefined, clear: boolean = false): Promise {
+  public refresh(pageNumber: number = undefined, options: PaginatorLoadDataOptions): Promise {
     if (pageNumber) {
-      return this.setPage(pageNumber, clear)
+      return this.setPage(pageNumber, options)
     }
 
-    return this.loadData(this.getCurrentPage(), this.getPageSize(), clear)
+    return this.loadData(this.getCurrentPage(), this.getPageSize(), options)
   }
 
   public flush(): void {
+    this.toFirstPage()
+
     this.viewDriver.setData([])
   }
 
-  public setPage(pageNumber: number, clear: boolean = false): Promise {
+  public setPage(pageNumber: number, options: PaginatorLoadDataOptions): Promise {
     this.viewDriver.setPage(pageNumber)
 
-    return this.loadData(this.viewDriver.getCurrentPage(), this.viewDriver.getPageSize(), clear)
+    return this.loadData(this.viewDriver.getCurrentPage(), this.viewDriver.getPageSize(), options)
   }
 
   public getLastPage(): number {
@@ -107,16 +109,29 @@ export default class Paginator {
     return this.viewDriver.getPages()
   }
 
-  protected loadData(pageNumber: number, pageSize: number, clear: boolean = true): void {
-    if (clear) {
-      this.viewDriver.setData([])
-    }
+  protected loadData(pageNumber: number, pageSize: number, options: PaginatorLoadDataOptions = {}): void {
+    const {
+      replace = false,
+      flush = false,
+    } = options
 
     return this.dataDriver.get(pageNumber, pageSize)
         .then((dto: PaginationDataDto) => {
-          this.viewDriver.setData(dto.getData())
-          this.viewDriver.setTotal(dto.getTotal())
+          this.passDataToViewDriver(dto, options)
         })
+  }
+
+  protected passDataToViewDriver(dto: PaginationDataDto, options: PaginatorLoadDataOptions) {
+    const {
+      flush = false,
+    } = options
+
+    if (flush) {
+      this.flush()
+    }
+
+    this.viewDriver.setData(dto.getData())
+    this.viewDriver.setTotal(dto.getTotal())
   }
 
   /**
