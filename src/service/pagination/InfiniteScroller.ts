@@ -15,8 +15,6 @@ export default class InfiniteScroller extends Paginator {
         }
 
         if (replace) {
-            this.toFirstPage()
-
             this.viewDriver.setData(dto.getData())
         } else {
             this.viewDriver.setData(

@@ -38,8 +38,6 @@ export default class Paginator {
   }
 
   public flush(): void {
-    this.toFirstPage()
-
     this.viewDriver.setData([])
   }
 
@@ -110,11 +108,6 @@ export default class Paginator {
   }
 
   protected loadData(pageNumber: number, pageSize: number, options: PaginatorLoadDataOptions = {}): void {
-    const {
-      replace = false,
-      flush = false,
-    } = options
-
     return this.dataDriver.get(pageNumber, pageSize)
         .then((dto: PaginationDataDto) => {
           this.passDataToViewDriver(dto, options)
