@@ -111,6 +111,8 @@ export default class Paginator {
     return this.dataDriver.get(pageNumber, pageSize)
         .then((dto: PaginationDataDto) => {
           this.passDataToViewDriver(dto, options)
+
+          return dto
         })
   }
 

@@ -2,6 +2,7 @@ export default class PaginationDataDto {
   public constructor(
       protected data: object[],
       protected total: number,
+      protected response: object = {}
   ) {
   }
 
@@ -11,5 +12,10 @@ export default class PaginationDataDto {
 
   public getTotal(): number {
     return this.total
+  }
+
+  public getResponse(): object
+  {
+    return this.response
   }
 }

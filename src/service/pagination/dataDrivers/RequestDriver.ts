@@ -16,6 +16,7 @@ export default class RequestDriver extends BaseDriver {
                 return new PaginationDataDto(
                     response.getData(),
                     response.getTotal(),
+                    response,
                 )
             })
     }
