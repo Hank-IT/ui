@@ -3,6 +3,8 @@ import PaginationDataDto from './dtos/PaginationDataDto'
 import ViewDriverContract from './contracts/ViewDriverContract'
 
 export default class Paginator {
+  protected initialized: boolean = false
+
   protected static viewDriverFactory: ViewDriverFactoryContract
 
   protected viewDriver: ViewDriverContract
@@ -22,6 +24,8 @@ export default class Paginator {
   }
 
   public init(pageNumber: number = undefined, pageSize: number = undefined): Promise {
+    this.initialized = true
+
     if (pageNumber && pageSize) {
       return this.loadData(pageNumber, pageSize)
     }
@@ -45,6 +49,11 @@ export default class Paginator {
     this.viewDriver.setPage(pageNumber)
 
     return this.loadData(this.viewDriver.getCurrentPage(), this.viewDriver.getPageSize(), options)
+  }
+
+  public isInitialized(): boolean
+  {
+    return this.initialized
   }
 
   public getLastPage(): number {
