@@ -27,15 +27,15 @@ Each requests requires its own class:
 import { BaseRequest, type ResponseContract, JsonResponse } from '@hank-it/ui/service/requests'
 
 export class GetCustomersRequest extends BaseRequest {
-  method(): string {
+  public method(): string {
     return 'GET'
   }
 
-  url(): string {
+  public url(): string {
     return '/api/v1/customers'
   }
   
-  protected getResponse() {
+  public getResponse() {
     return new JsonResponse
   }
 }
@@ -143,7 +143,7 @@ new GetCustomersRequest()
 #### Posting json data
 ``` typescript
 // This is the json content for the request
-const content = new JsonContent({
+const content = new JsonBody({
   email: "username",
   password: "password",
 })
@@ -165,7 +165,7 @@ export interface AuthPayload {
   password: string,
 }
 
-export class AuthJsonContent extends JsonContent {
+export class AuthJsonContent extends JsonBody {
   public constructor(protected data: AuthPayload) {}
 }
 
@@ -203,7 +203,7 @@ You may use any request to upload files:
 const file = ref()
 
 function submit() {
-  const content = new FormDataContent({
+  const content = new FormDataBody({
     file: file.value.files[0],
   })
 

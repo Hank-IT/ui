@@ -1,8 +1,9 @@
-import ResponseError from '../dtos/ResponseError'
-import RequestBaseException from './RequestBaseException'
+import { type ResponseHandlerContract } from '../drivers/contracts/ResponseHandlerContract'
 
-export default class ResponseException extends RequestBaseException {
-    constructor(error: ResponseError) {
-        super(error)
-    }
+export class ResponseException {
+  constructor(protected response: ResponseHandlerContract) {}
+
+  public getResponse(): ResponseHandlerContract {
+    return this.response
+  }
 }

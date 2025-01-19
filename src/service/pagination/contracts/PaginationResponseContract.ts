@@ -1,5 +1,7 @@
-export default interface PaginationResponseContract {
-    getData(): object[]
+import { type ResponseContract } from '../../requests/contracts/ResponseContract'
 
-    getTotal(): number
+export interface PaginationResponseContract<ResponseBodyInterface,ResourceInterface> extends ResponseContract<ResponseBodyInterface> {
+  getData(): ResourceInterface
+
+  getTotal(): number
 }

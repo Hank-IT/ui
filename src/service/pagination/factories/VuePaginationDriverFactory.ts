@@ -1,8 +1,9 @@
-import VuePaginationDriver from '../frontendDrivers/VuePaginationDriver'
-import ViewDriverFactoryContract from '../contracts/ViewDriverFactoryContract'
+import { VuePaginationDriver } from '../frontendDrivers/VuePaginationDriver'
+import { type ViewDriverFactoryContract } from '../contracts/ViewDriverFactoryContract'
+import { type ViewDriverContract } from '../contracts/ViewDriverContract'
 
-export default class VuePaginationDriverFactory implements ViewDriverFactoryContract {
-    public make(pageNumber: number, pageSize: number): VuePaginationDriver {
-        return new VuePaginationDriver(pageNumber, pageSize)
+export class VuePaginationDriverFactory implements ViewDriverFactoryContract {
+    public make<ResourceInterface>(pageNumber: number, pageSize: number): ViewDriverContract<ResourceInterface[]> {
+        return new VuePaginationDriver<ResourceInterface>(pageNumber, pageSize)
     }
 }

@@ -1,21 +1,15 @@
-export default class PaginationDataDto {
+export class PaginationDataDto<ResourceInterface> {
   public constructor(
-      protected data: object[],
+      protected data: ResourceInterface,
       protected total: number,
-      protected response: object = {}
   ) {
   }
 
-  public getData(): object[] {
+  public getData(): ResourceInterface {
     return this.data
   }
 
   public getTotal(): number {
     return this.total
-  }
-
-  public getResponse(): object
-  {
-    return this.response
   }
 }

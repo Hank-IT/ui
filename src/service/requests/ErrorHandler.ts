@@ -1,63 +1,60 @@
-import NoResponseReceivedError from './dtos/NoResponseReceivedError'
-import RequestError from './dtos/RequestError'
-import ResponseError from './dtos/ResponseError'
-import PageExpiredException from './exceptions/PageExpiredException'
-import NotFoundException from './exceptions/NotFoundException'
-import UnauthorizedException from './exceptions/UnauthorizedException'
-import ValidationException from './exceptions/ValidationException'
-import ResponseException from './exceptions/ResponseException'
-import {NoResponseReceivedException, ServerErrorException} from './exceptions'
+import { PageExpiredException } from './exceptions/PageExpiredException'
+import { NotFoundException } from './exceptions/NotFoundException'
+import { UnauthorizedException } from './exceptions/UnauthorizedException'
+import { ValidationException } from './exceptions/ValidationException'
+import { ResponseException } from './exceptions/ResponseException'
+import { NoResponseReceivedException } from './exceptions/NoResponseReceivedException'
+import { ServerErrorException } from './exceptions/ServerErrorException'
+import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
 
-export default class ErrorHandler {
-    protected error: NoResponseReceivedError|RequestError|ResponseError
+export type ErrorHandlerCallback = ((exception: ResponseException) => boolean | void) | undefined;
 
-    protected static handler = undefined
+export class ErrorHandler {
+  protected static handler: ErrorHandlerCallback = undefined
 
-    public constructor(error: NoResponseReceivedError|RequestError|ResponseError) {
-        this.error = error
-
-        // Check if there is a global error handler set
-        if (ErrorHandler.handler) {
-            // If handler returns false, we don't process the error further
-            if (ErrorHandler.handler(error) === false) {
-                return
-            }
-        }
-
-        if (error instanceof NoResponseReceivedError) {
-            throw new NoResponseReceivedException(error)
-        } else if (error instanceof ResponseError) {
-            this.handleResponseError()
-        } else {
-            console.error('HankIT-UI: Unknown error received.', error)
-        }
+  public constructor(protected error: ResponseException) {
+    // Check if there is a global error handler set
+    if (ErrorHandler.handler !== undefined) {
+      // If handler returns false, we don't process the error further
+      if (ErrorHandler.handler(error) === false) {
+        return
+      }
     }
 
-    public static registerHandler(callback) {
-        ErrorHandler.handler = callback
+    const response = error.getResponse()
+
+    if (response.getStatusCode()) {
+      this.handleResponseError(response)
     }
 
-    protected handleResponseError() {
-        if (this.error.getStatusCode() === 401) {
-            throw new UnauthorizedException(this.error)
-        }
+    throw new NoResponseReceivedException(error.getResponse())
+  }
 
-        if (this.error.getStatusCode() === 404) {
-            throw new NotFoundException(this.error)
-        }
+  public static registerHandler(callback: ErrorHandlerCallback) {
+    ErrorHandler.handler = callback
+  }
 
-        if (this.error.getStatusCode() === 419) {
-            throw new PageExpiredException(this.error)
-        }
-
-        if (this.error.getStatusCode() === 422) {
-            throw new ValidationException(this.error)
-        }
-
-        if (this.error.getStatusCode() === 500) {
-            throw new ServerErrorException(this.error)
-        }
-
-        throw new ResponseException(this.error)
+  protected handleResponseError(response: ResponseHandlerContract) {
+    if (response.getStatusCode() === 401) {
+      throw new UnauthorizedException(response)
     }
+
+    if (response.getStatusCode() === 404) {
+      throw new NotFoundException(response)
+    }
+
+    if (response.getStatusCode() === 419) {
+      throw new PageExpiredException(response)
+    }
+
+    if (response.getStatusCode() === 422) {
+      throw new ValidationException(response)
+    }
+
+    if (response.getStatusCode() === 500) {
+      throw new ServerErrorException(response)
+    }
+
+    throw new ResponseException(response)
+  }
 }

@@ -1,17 +1,24 @@
-import { ref, computed } from 'vue'
+import { ref, computed, type Ref, type ComputedRef } from 'vue'
 
-export default function(defaultValue = null, delay = 500) {
-    const isOpenFromVarKey = ref(0)
+export default function<T>(
+  defaultValue: T | null = null,
+  delay: number = 500
+): {
+  fromVar: ComputedRef<T | null>, // Computed-Wert für `fromVar`
+  isOpenFromVar: ComputedRef<boolean | T>, // Computed-Wert für `isOpenFromVar` (enthält boolean oder `T`)
+  isOpenFromVarKey: Ref<number>, // Ref-Wert des Counters
+} {
+    const isOpenFromVarKey: Ref<number> = ref(0)
 
-    const internalIsOpen = ref(false)
+    const internalIsOpen: Ref<boolean> = ref(false)
 
-    const internalFromVar = ref(defaultValue)
+  const internalFromVar = ref<T | null>(defaultValue)
 
     const isOpenFromVar = computed({
         get() {
             return internalIsOpen.value
         },
-        set(value) {
+      set(value: boolean | T) {
             if (value) {
                 internalIsOpen.value = true
 
@@ -22,17 +29,17 @@ export default function(defaultValue = null, delay = 500) {
                 setTimeout(() => {
                     internalFromVar.value = defaultValue
 
-                    isOpenFromVarKey.value ++
+                    isOpenFromVarKey.value++
                 }, delay)
             }
         }
     })
 
     const fromVar = computed({
-        get() {
-            return internalFromVar.value
+        get(): T | null {
+          return internalFromVar.value
         },
-        set(value) {
+        set(value: T | null) {
             if (value) {
                 isOpenFromVar.value = true
 

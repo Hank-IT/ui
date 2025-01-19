@@ -1,13 +1,15 @@
-import BaseResponse from './BaseResponse'
+import { BaseResponse } from './BaseResponse'
 
-export default class PlainTextResponse extends BaseResponse {
-    public getRequestHeaders(): object {
-        return {
-            'Accept': 'text/plain',
-        }
+export class PlainTextResponse extends BaseResponse<string> {
+  public getAcceptHeader(): string {
+    return 'text/plain'
+  }
+
+  protected resolveBody(): Promise<string> {
+    if (! this.response) {
+      throw new Error('Response is not set')
     }
 
-    public getBodyPromiseFromResponse(response): object {
-        return response.text()
-    }
+    return this.response.text()
+  }
 }

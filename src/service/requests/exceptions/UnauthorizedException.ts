@@ -1,5 +1,5 @@
-import ResponseException from './ResponseException'
+import { ResponseException } from './ResponseException'
 
-export default class UnauthorizedException extends ResponseException{
+export class UnauthorizedException extends ResponseException {
 
 }

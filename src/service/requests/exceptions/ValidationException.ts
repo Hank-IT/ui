@@ -1,5 +1,5 @@
-import ResponseException from './ResponseException'
+import { ResponseException } from './ResponseException'
 
-export default class ValidationException extends ResponseException{
+export class ValidationException extends ResponseException {
 
 }

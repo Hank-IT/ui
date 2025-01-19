@@ -1,19 +1,21 @@
-import BaseResponse from './BaseResponse'
+import { BaseResponse } from './BaseResponse'
 
-export default class BlobResponse extends BaseResponse {
-    public constructor(
-        protected mimeType: string = 'application/octet-stream',
-    ) {
-        super()
+export class BlobResponse extends BaseResponse<Blob> {
+  public constructor(
+    protected mimeType: string = 'application/octet-stream'
+  ) {
+    super()
+  }
+
+  public getAcceptHeader(): string {
+    return this.mimeType
+  }
+
+  protected resolveBody(): Promise<Blob> {
+    if (!this.response) {
+      throw new Error('Response is not set')
     }
 
-    public getRequestHeaders(): object {
-        return {
-            'Accept': this.mimeType,
-        }
-    }
-
-    public getBodyPromiseFromResponse(response): object {
-        return response.blob()
-    }
+    return this.response.blob()
+  }
 }

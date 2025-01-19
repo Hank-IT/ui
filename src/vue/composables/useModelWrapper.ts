@@ -1,20 +1,27 @@
 import { computed } from 'vue'
+import { type ModelValueProps } from '../contracts/ModelValueProps'
+import { type ModelValueOptions as ParentModelValueOptions } from '../contracts/ModelValueOptions'
 
-export default function(props, emit, options = {}) {
-    const {
-        name = 'modelValue',
-        // eslint-disable-next-line no-unused-vars
-        callback = value => {},
-    } = options
+export interface ModelValueOptions extends ParentModelValueOptions {
+  callback?: (value: unknown) => void
+}
 
-    return computed({
-        get() {
-            return props[name]
-        },
-        set(value) {
-            emit(`update:${name}`, value)
+export type EmitFunction = (event: string, value: unknown) => void
 
-            callback(value)
-        }
-    })
+export default function(props: ModelValueProps, emit: EmitFunction, options: ModelValueOptions = {}) {
+  const {
+    name = 'modelValue',
+    callback = () => {}
+  } = options
+
+  return computed({
+    get() {
+      return props[name]
+    },
+    set(value) {
+      emit(`update:${name}`, value)
+
+      callback(value)
+    }
+  })
 }
