@@ -1,14 +1,18 @@
 import { nextTick, watch } from 'vue'
+import { type ModelValueProps } from '../contracts/ModelValueProps'
+import { type ModelValueOptions } from '../contracts/ModelValueOptions'
 
-export default function(props, options = {}) {
+export type useOnOpenCallback = (() => void) | undefined;
+
+export default function(props: ModelValueProps, options: ModelValueOptions = {}) {
   const {
-    name = 'modelValue',
+    name = 'modelValue'
   } = options
 
-  function onOpen(callback) {
+  function onOpen(callback: useOnOpenCallback) {
     watch(() => props[name], () => {
       nextTick(() => {
-        if (props[name]) {
+        if (props[name] && callback) {
           callback()
         }
       })

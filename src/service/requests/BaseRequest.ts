@@ -1,119 +1,180 @@
 import qs from 'qs'
-import type LoadingStateContract from './contracts/LoadingStateContract'
-import type RequestDriverContract from './contracts/RequestDriverContract'
-import type ContentContract from './contracts/ContentContract'
-import ErrorHandler from './ErrorHandler'
-import ResponseDto from './dtos/ResponseDto'
-import DriverConfigContract from './contracts/DriverConfigContract'
+import { ErrorHandler } from './ErrorHandler'
+import { RequestEvents } from './RequestEvents.enum'
+import { RequestMethodEnum } from './RequestMethod.enum'
+import { BaseResponse } from './responses/BaseResponse'
+import { ResponseException } from './exceptions/ResponseException'
+import { type DriverConfigContract } from './contracts/DriverConfigContract'
+import { type BodyFactoryContract } from './contracts/BodyFactoryContract'
+import { type LoadingStateContract } from './contracts/LoadingStateContract'
+import { type RequestDriverContract } from './contracts/RequestDriverContract'
+import { type ViewLoaderFactoryContract } from './contracts/ViewLoaderFactoryContract'
+import { type BaseRequestContract, type EventHandlerCallback } from './contracts/BaseRequestContract'
+import { type HeadersContract } from './contracts/HeadersContract'
+import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
+import { type ResponseContract } from './contracts/ResponseContract'
+import { mergeDeep } from '../../helpers'
 
-export default abstract class BaseRequest {
-    protected params = {}
-    protected content: ContentContract
-    public loadingStateDriver: LoadingStateContract = undefined
-    protected driverConfig = {}
+export abstract class BaseRequest<
+  ResponseBodyInterface = undefined,
+  ResponseClass extends ResponseContract<ResponseBodyInterface> = BaseResponse<ResponseBodyInterface>,
+  RequestBodyInterface = undefined,
+  RequestParamsInterface extends object = object,
+> implements BaseRequestContract<
+  RequestBodyInterface,
+  ResponseClass,
+  RequestParamsInterface
+> {
+  protected params: RequestParamsInterface | undefined = undefined
+  protected requestBody: RequestBodyInterface | undefined = undefined
+  protected loadingStateDriver: LoadingStateContract | undefined = undefined
+  protected events: { [key in RequestEvents]?: EventHandlerCallback[] } = {};
 
-    protected static defaultBaseUrl: string
+  protected static defaultBaseUrl: string
 
-    protected static requestDriver: RequestDriverContract
-    protected static loaderStateFactory: ViewLoaderFactoryContract
+  protected static requestDriver: RequestDriverContract
+  protected static loaderStateFactory: ViewLoaderFactoryContract
 
-    protected constructor(config: DriverConfigContract) {
-        if (BaseRequest.loaderStateFactory !== undefined) {
-            this.loadingStateDriver = BaseRequest.loaderStateFactory.make()
-        }
+  public constructor() {
+    if (BaseRequest.loaderStateFactory !== undefined) {
+      this.loadingStateDriver = BaseRequest.loaderStateFactory.make()
+    }
+  }
 
-        this.driverConfig = config
+  public static setRequestDriver(driver: RequestDriverContract) {
+    this.requestDriver = driver
+  }
+
+  public static setLoaderStateFactory(factory: ViewLoaderFactoryContract): void {
+    this.loaderStateFactory = factory
+  }
+
+  public static setDefaultBaseUrl(url: string) {
+    this.defaultBaseUrl = url
+  }
+
+  public abstract method(): RequestMethodEnum
+
+  public abstract url(): URL | string
+
+  public setParams(
+    params?: RequestParamsInterface
+  ): this {
+    this.params = params
+
+    return this
+  }
+
+  public withParams(
+    params: RequestParamsInterface
+  ): this {
+    this.params = this.params === undefined
+      ? params
+      : mergeDeep(this.params, params) as RequestParamsInterface
+
+    return this
+  }
+
+  public getParams(): RequestParamsInterface | undefined {
+    return this.params
+  }
+
+  public setBody(requestBody: RequestBodyInterface): this {
+    this.requestBody = requestBody
+
+    return this
+  }
+
+  public requestHeaders(): HeadersContract {
+    return {}
+  }
+
+  public buildUrl(): URL {
+    const url = this.params !== undefined && Object.keys(this.params).length === 0
+      ? this.url()
+      : this.url() + '?' + qs.stringify(this.params)
+
+    return new URL(url, this.baseUrl() ?? BaseRequest.defaultBaseUrl)
+  }
+
+  public on(event: RequestEvents, handler: EventHandlerCallback): this {
+    if (!this.events[event]) {
+      this.events[event] = []
     }
 
-    public static setRequestDriver(driver: RequestDriverContract) {
-        this.requestDriver = driver
+    this.events[event].push(handler)
+
+    return this
+  }
+
+  protected dispatch(event: RequestEvents, ...args: Array<unknown>) {
+    if (!this.events[event]) {
+      return
     }
 
-    public static setLoaderStateFactory(factory: ViewLoaderFactoryContract): void {
-        this.loaderStateFactory = factory
+    // @ts-expect-error Spread operator causes problems
+    this.events[event].forEach((handler: EventHandlerCallback) => handler(...args))
+  }
+
+  public async send(): Promise<ResponseClass> {
+    this.dispatch(RequestEvents.LOADING, true)
+
+    this.loadingStateDriver?.setLoading(true)
+
+    const responseSkeleton = this.getResponse()
+
+    const requestBody = this.requestBody === undefined
+      ? undefined
+      : this.getRequestBodyFactory()?.make(this.requestBody)
+
+    return BaseRequest.requestDriver.send(
+      this.buildUrl(),
+      this.method(),
+      {
+        'Accept': responseSkeleton.getAcceptHeader(),
+        ...this.requestHeaders()
+      },
+      requestBody,
+      this.getConfig()
+    ).then(async (responseHandler: ResponseHandlerContract) => {
+      await responseSkeleton.setResponse(responseHandler)
+
+      return responseSkeleton
+    }).catch(error => {
+      if (error instanceof ResponseException) {
+        new ErrorHandler(error)
+
+        Promise.resolve()
+      }
+
+      console.error('HankIT-UI: Unknown error received.', error)
+
+      throw error
+    }).finally(() => {
+      this.dispatch(RequestEvents.LOADING, false)
+      this.loadingStateDriver?.setLoading(false)
+    })
+  }
+
+  public isLoading(): boolean {
+    if (!this.loadingStateDriver) {
+      return false
     }
 
-    public static setDefaultBaseUrl(url: string) {
-        this.defaultBaseUrl = url
-    }
+    return this.loadingStateDriver?.isLoading()
+  }
 
-    abstract method(): string
+  public abstract getResponse(): ResponseClass
 
-    abstract url(): string
+  public getRequestBodyFactory(): BodyFactoryContract<RequestBodyInterface | undefined> | undefined {
+    return undefined
+  }
 
-    public setParams(params: object): BaseRequest {
-        this.params = params
-        return this
-    }
+  protected baseUrl(): undefined {
+    return undefined
+  }
 
-    withParams(params) {
-        this.params = {
-            ...this.params,
-            ...params,
-        }
-
-        return this
-    }
-
-    setBody(content: ContentContract) {
-        this.content = content
-
-        return this
-    }
-
-    public headers() {
-        return {}
-    }
-
-    protected buildUrl(): string {
-        const url = Object.keys(this.params).length === 0
-            ? this.url()
-            : this.url() + '?' + qs.stringify(this.params)
-
-        return new URL(url, this.baseUrl() ?? BaseRequest.defaultBaseUrl)
-    }
-
-    public send() {
-        const mergedConfig = {
-            ...this.driverConfig,
-            ...this.getConfig(),
-        }
-
-        this.loadingStateDriver?.setLoading(true)
-
-        const responseSkeleton = this.getResponse()
-
-        return BaseRequest.requestDriver.send(
-            this.buildUrl(),
-            this.method(),
-            this.headers(),
-            this.content,
-            responseSkeleton,
-            mergedConfig,
-        ).then((responseDto: ResponseDto) => {
-            responseSkeleton.setBodyPromise(responseDto.getBodyPromise())
-            responseSkeleton.setStatusCode(responseDto.getStatusCode())
-            responseSkeleton.setResponseHeaders(responseDto.getResponseHeaders())
-            responseSkeleton.setOriginalResponse(responseDto.getResponse())
-
-            return responseSkeleton.getBodyPromise()
-        }).catch(error => new ErrorHandler(error))
-          .finally(() => {
-              this.loadingStateDriver?.setLoading(false)
-          })
-    }
-
-    public isLoading(): boolean {
-        return this.loadingStateDriver?.isLoading()
-    }
-
-    protected baseUrl(): undefined {
-        return undefined
-    }
-
-    public abstract getResponse()
-
-    protected getConfig(): obj {
-        return {}
-    }
+  protected getConfig(): DriverConfigContract | undefined {
+    return undefined
+  }
 }

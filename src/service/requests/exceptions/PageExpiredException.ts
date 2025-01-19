@@ -1,5 +1,5 @@
-import ResponseException from './ResponseException'
+import { ResponseException } from './ResponseException'
 
-export default class PageExpiredException extends ResponseException{
+export class PageExpiredException extends ResponseException {
 
 }

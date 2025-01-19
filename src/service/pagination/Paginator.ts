@@ -1,29 +1,29 @@
-import ViewDriverFactoryContract from './contracts/ViewDriverFactoryContract'
-import PaginationDataDto from './dtos/PaginationDataDto'
-import ViewDriverContract from './contracts/ViewDriverContract'
+import { PaginationDataDto } from './dtos/PaginationDataDto'
+import { type ViewDriverContract } from './contracts/ViewDriverContract'
+import { type ViewDriverFactoryContract } from './contracts/ViewDriverFactoryContract'
+import { type PaginatorLoadDataOptions } from './contracts/PaginatorLoadDataOptions'
+import { type PaginationDataDriverContract } from './contracts/PaginationDataDriverContract'
 
-export default class Paginator {
+export class Paginator<ResourceInterface> {
   protected initialized: boolean = false
 
   protected static viewDriverFactory: ViewDriverFactoryContract
 
-  protected viewDriver: ViewDriverContract
+  protected viewDriver: ViewDriverContract<ResourceInterface[]>
 
   public static setViewDriverFactory(value: ViewDriverFactoryContract): void {
     Paginator.viewDriverFactory = value
   }
 
   public constructor(
-    dataDriver,
+    protected dataDriver: PaginationDataDriverContract<ResourceInterface>,
     pageNumber: number = 1,
-    pageSize: number = 10,
+    pageSize: number = 10
   ) {
-    this.dataDriver = dataDriver
-
-    this.viewDriver = Paginator.viewDriverFactory.make(pageNumber, pageSize)
+    this.viewDriver = Paginator.viewDriverFactory.make<ResourceInterface>(pageNumber, pageSize)
   }
 
-  public init(pageNumber: number = undefined, pageSize: number = undefined): Promise {
+  public init(pageNumber: number, pageSize: number): Promise<PaginationDataDto<ResourceInterface[]>> {
     this.initialized = true
 
     if (pageNumber && pageSize) {
@@ -33,8 +33,8 @@ export default class Paginator {
     return this.loadData(this.getCurrentPage(), this.getPageSize())
   }
 
-  public refresh(pageNumber: number = undefined, options: PaginatorLoadDataOptions): Promise {
-    if (pageNumber) {
+  public refresh(pageNumber?: number, options?: PaginatorLoadDataOptions): Promise<PaginationDataDto<ResourceInterface[]>> {
+    if (pageNumber !== undefined) {
       return this.setPage(pageNumber, options)
     }
 
@@ -45,14 +45,13 @@ export default class Paginator {
     this.viewDriver.setData([])
   }
 
-  public setPage(pageNumber: number, options: PaginatorLoadDataOptions): Promise {
+  public setPage(pageNumber: number, options?: PaginatorLoadDataOptions): Promise<PaginationDataDto<ResourceInterface[]>> {
     this.viewDriver.setPage(pageNumber)
 
     return this.loadData(this.viewDriver.getCurrentPage(), this.viewDriver.getPageSize(), options)
   }
 
-  public isInitialized(): boolean
-  {
+  public isInitialized(): boolean {
     return this.initialized
   }
 
@@ -60,23 +59,23 @@ export default class Paginator {
     return this.viewDriver.getLastPage()
   }
 
-  public toNextPage(): void {
-    this.setPage(this.getCurrentPage() + 1)
+  public toNextPage(): Promise<PaginationDataDto<ResourceInterface[]>> {
+    return this.setPage(this.getCurrentPage() + 1)
   }
 
-  public toFirstPage(): void {
-    this.setPage(1)
+  public toFirstPage(): Promise<PaginationDataDto<ResourceInterface[]>> {
+    return this.setPage(1)
   }
 
-  public toLastPage(): void {
-    this.setPage(this.viewDriver.getLastPage())
+  public toLastPage(): Promise<PaginationDataDto<ResourceInterface[]>> {
+    return this.setPage(this.viewDriver.getLastPage())
   }
 
-  public toPreviousPage(): void {
-    this.setPage(this.getCurrentPage() - 1)
+  public toPreviousPage(): Promise<PaginationDataDto<ResourceInterface[]>> {
+    return this.setPage(this.getCurrentPage() - 1)
   }
 
-  public getPageData(): object[] {
+  public getPageData(): ResourceInterface[] {
     return this.viewDriver.getData()
   }
 
@@ -100,13 +99,11 @@ export default class Paginator {
     return this.viewDriver.getPageSize()
   }
 
-  public setPageSize(pageSize: number): void {
+  public setPageSize(pageSize: number): Promise<PaginationDataDto<ResourceInterface[]>> {
     this.viewDriver.setPageSize(pageSize)
 
     if (this.getCurrentPage() * pageSize > this.getTotal()) {
-      this.setPage(1)
-
-      return
+      return this.setPage(1)
     }
 
     return this.loadData(this.viewDriver.getCurrentPage(), this.viewDriver.getPageSize())
@@ -116,36 +113,21 @@ export default class Paginator {
     return this.viewDriver.getPages()
   }
 
-  protected loadData(pageNumber: number, pageSize: number, options: PaginatorLoadDataOptions = {}): void {
+  protected loadData(pageNumber: number, pageSize: number, options?: PaginatorLoadDataOptions): Promise<PaginationDataDto<ResourceInterface[]>> {
     return this.dataDriver.get(pageNumber, pageSize)
-        .then((dto: PaginationDataDto) => {
-          this.passDataToViewDriver(dto, options)
+      .then((value: PaginationDataDto<ResourceInterface[]>) => {
+        this.passDataToViewDriver(value, options)
 
-          return dto
-        })
+        return value
+      })
   }
 
-  protected passDataToViewDriver(dto: PaginationDataDto, options: PaginatorLoadDataOptions) {
-    const {
-      flush = false,
-    } = options
-
-    if (flush) {
+  protected passDataToViewDriver(dto: PaginationDataDto<ResourceInterface[]>, options?: PaginatorLoadDataOptions): void {
+    if (options?.flush) {
       this.flush()
     }
 
     this.viewDriver.setData(dto.getData())
     this.viewDriver.setTotal(dto.getTotal())
-  }
-
-  /**
-   * @param matcher find the object in the data array
-   * @param updater must return the changed object
-   */
-  public updateItem(
-      matcher: (value: object, index: number) => boolean,
-      updater: (value: object) => object,
-  ): void {
-    return this.viewDriver.updateItem(matcher, updater)
   }
 }

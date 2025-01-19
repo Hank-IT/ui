@@ -1,9 +1,7 @@
-export default interface ResponseContract {
-  getBodyPromise(): object
+import type { ResponseHandlerContract } from '../drivers/contracts/ResponseHandlerContract'
 
-  getRaw(): object
+export interface ResponseContract<ResponseBodyInterface> {
+  getAcceptHeader(): string
 
-  getStatusCode(): number
-
-  getHeaders(): object
+  setResponse(response: ResponseHandlerContract): Promise<ResponseBodyInterface>
 }

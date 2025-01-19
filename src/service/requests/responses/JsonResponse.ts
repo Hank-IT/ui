@@ -1,13 +1,15 @@
-import BaseResponse from './BaseResponse'
+import { BaseResponse } from './BaseResponse'
 
-export default class JsonResponse extends BaseResponse {
-    public getRequestHeaders(): object {
-        return {
-            'Accept': 'application/json',
-        }
+export class JsonResponse<ResponseBodyInterface> extends BaseResponse<ResponseBodyInterface> {
+  public getAcceptHeader(): string {
+    return 'application/json'
+  }
+
+  protected resolveBody(): Promise<ResponseBodyInterface> {
+    if (!this.response) {
+      throw new Error('Response is not set')
     }
 
-    public getBodyPromiseFromResponse(response): object {
-        return response.json()
-    }
+    return this.response.json<ResponseBodyInterface>()
+  }
 }

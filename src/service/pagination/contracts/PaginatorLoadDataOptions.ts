@@ -1,4 +1,4 @@
-interface PaginatorLoadDataOptions {
-    replace: Boolean,
-    flush: Boolean,
+export interface PaginatorLoadDataOptions {
+    replace?: boolean,
+    flush?: boolean,
 }

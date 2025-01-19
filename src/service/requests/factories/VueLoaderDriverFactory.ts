@@ -1,9 +1,8 @@
-import LoadingStateContract from '../contracts/LoadingStateContract'
-import VueLoadingState from '../loader/VueLoadingStateDriver'
+import { VueLoadingStateDriver } from '../loader/VueLoadingStateDriver'
+import { type LoadingStateContract } from '../contracts/LoadingStateContract'
 
-export default class VueLoaderDriverFactory {
-
+export class VueLoaderDriverFactory {
     public make(): LoadingStateContract {
-        return new VueLoadingState()
+        return new VueLoadingStateDriver()
     }
 }

@@ -1,8 +1,4 @@
-import NoResponseReceivedError from '../dtos/NoResponseReceivedError'
-import RequestBaseException from './RequestBaseException'
+import { ResponseException } from './ResponseException'
 
-export default class NoResponseReceivedException extends RequestBaseException {
-    public constructor(error: NoResponseReceivedError) {
-        super(error)
-    }
+export class NoResponseReceivedException extends ResponseException {
 }

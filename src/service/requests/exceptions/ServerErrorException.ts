@@ -1,4 +1,4 @@
-import ResponseException from './ResponseException'
+import { ResponseException } from './ResponseException'
 
-export default class ServerErrorException extends ResponseException {
+export class ServerErrorException extends ResponseException {
 }

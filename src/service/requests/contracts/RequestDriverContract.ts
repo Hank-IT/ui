@@ -1,16 +1,15 @@
-import ContentContract from './ContentContract'
-import DriverConfigContract from './DriverConfigContract'
-import BaseResponse from '../responses/BaseResponse'
+import { RequestMethodEnum } from '../RequestMethod.enum'
+import { type HeadersContract } from './HeadersContract'
+import { type BodyContract } from './BodyContract'
+import { type ResponseHandlerContract } from '../drivers/contracts/ResponseHandlerContract'
+import { type DriverConfigContract } from './DriverConfigContract'
 
-export default interface RequestDriverContract {
+export interface RequestDriverContract {
   send(
-    url: string,
-    method: string,
-    headers: object,
-    content: ContentContract,
-    responseSkeleton: BaseResponse,
-    requestConfig: DriverConfigContract
-  )
-
-  buildErrorResponse(error)
+    url: URL | string,
+    method: RequestMethodEnum,
+    headers: HeadersContract,
+    body?: BodyContract,
+    requestConfig?: DriverConfigContract
+  ): Promise<ResponseHandlerContract>
 }

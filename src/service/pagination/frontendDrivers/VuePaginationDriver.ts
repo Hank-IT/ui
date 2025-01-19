@@ -1,16 +1,16 @@
-import { computed, ref } from 'vue'
-import type { Ref, ComputedRef } from 'vue'
+import { computed, ref, type Ref, type ComputedRef } from 'vue'
+import { type ViewDriverContract } from '../contracts/ViewDriverContract'
 
-export default class VuePaginationDriver {
-  protected dataRef: Ref<object[]>
+export class VuePaginationDriver<ResourceInterface> implements ViewDriverContract<ResourceInterface[]> {
+  protected dataRef: Ref<ResourceInterface[]>;
   protected currentPageRef: Ref<number>
   protected pageSizeRef: Ref<number>
   protected totalRef: Ref<number>
   protected totalPagesComputed: ComputedRef<number>
   protected pagesComputed: ComputedRef<number[]>
 
-  public constructor(pageNumber, pageSize) {
-    this.dataRef = ref<object[]>([])
+  public constructor(pageNumber: number, pageSize: number) {
+    this.dataRef = ref([]) as Ref<ResourceInterface[]>;
     this.currentPageRef = ref<number>(pageNumber)
     this.pageSizeRef = ref<number>(pageSize)
     this.totalRef = ref<number>(0)
@@ -19,7 +19,7 @@ export default class VuePaginationDriver {
     this.pagesComputed = computed(() => Array.from({ length: this.totalPagesComputed.value }, (_, i) => i + 1))
   }
 
-  public setData(data: object[]): void {
+  public setData(data: ResourceInterface[]): void {
     this.dataRef.value = data
   }
 
@@ -27,7 +27,7 @@ export default class VuePaginationDriver {
     this.totalRef.value = value
   }
 
-  public getData(): object[] {
+  public getData(): ResourceInterface[] {
     return this.dataRef.value
   }
 
@@ -57,16 +57,5 @@ export default class VuePaginationDriver {
 
   public getTotal(): number {
     return this.totalRef.value
-  }
-
-  public updateItem(
-      matcher: (value: object, index: number) => boolean,
-      updater: (value: object) => object,
-  ): void {
-    const index = this.dataRef.value.findIndex(matcher)
-
-    if (index === -1) return
-
-    updater(this.dataRef.value[index])
   }
 }

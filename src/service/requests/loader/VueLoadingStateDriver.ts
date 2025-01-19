@@ -1,7 +1,7 @@
 import { type Ref, ref } from 'vue'
-import type LoadingStateContract from '../contracts/LoadingStateContract'
+import { type LoadingStateContract } from '../contracts/LoadingStateContract'
 
-export default class VueLoadingState implements LoadingStateContract {
+export class VueLoadingStateDriver implements LoadingStateContract {
   protected loading: Ref<boolean>
 
   constructor() {

@@ -1,4 +1,7 @@
-export default interface DriverConfigContract {
-    corsWithCredentials: boolean
-    abortSignal: undefined
+import { type HeadersContract } from './HeadersContract'
+
+export interface DriverConfigContract {
+  corsWithCredentials?: boolean
+  abortSignal?: AbortSignal
+  headers?: HeadersContract
 }

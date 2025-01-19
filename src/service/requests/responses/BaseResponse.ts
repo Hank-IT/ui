@@ -1,74 +1,41 @@
-import type ResponseContract from '../contracts/ResponseContract'
+import { type ResponseHandlerContract } from '../drivers/contracts/ResponseHandlerContract'
+import { type HeadersContract } from '../contracts/HeadersContract'
+import { type ResponseContract } from '../contracts/ResponseContract'
 
-export default abstract class BaseResponse implements ResponseContract {
-    protected bodyPromise: Promise
-    protected originalResponse: object = {}
-    protected statusCode: number
-    protected data
-    protected body
-    protected responseHeaders
+export abstract class BaseResponse<ResponseInterface> implements ResponseContract<ResponseInterface>{
+  private body?: ResponseInterface
 
-    public setStatusCode(value: number): void {
-        this.statusCode = value
+  protected response?: ResponseHandlerContract
+
+  public abstract getAcceptHeader(): string
+
+  protected abstract resolveBody(): Promise<ResponseInterface>
+
+  public async setResponse(response: ResponseHandlerContract): Promise<ResponseInterface> {
+    this.response = response
+
+    this.body = await this.resolveBody()
+
+    return this.body
+  }
+
+  public getRawResponse(): Response | undefined {
+    return this.response?.getRawResponse()
+  }
+
+  public getStatusCode(): number | undefined {
+    return this.response?.getStatusCode()
+  }
+
+  public getHeaders(): HeadersContract | undefined {
+    return this.response?.getHeaders()
+  }
+
+  public getBody(): ResponseInterface {
+    if (this.body === undefined) {
+      throw new Error('Response body is not set')
     }
 
-    public setOriginalResponse(value: object): void {
-        this.originalResponse = value
-    }
-
-    public setBodyPromise(promise) {
-        this.bodyPromise = this.internalBodyHandler(promise)
-    }
-
-    public setResponseHeaders(headers) {
-        this.responseHeaders = headers
-    }
-
-    public getBodyPromise(): object {
-        return this.bodyPromise
-    }
-
-    public getOriginalResponse(): object {
-        return this.originalResponse
-    }
-
-    public getStatusCode(): number {
-        return this.statusCode
-    }
-
-    /**
-     * Data is parsed subset of the response payload.
-     */
-    public getData() {
-        return this.data
-    }
-
-    /**
-     * Body is the full response payload.
-     */
-    public getBody(): any {
-        return this.body
-    }
-
-    protected internalBodyHandler(promise) {
-        return promise.then(data => {
-            this.body = data
-
-            this.data = this.dataHandler(data)
-
-            return this
-        })
-    }
-
-    public dataHandler(body): any {
-        return body
-    }
-
-    public getResponseHeaders(): object {
-        return this.responseHeaders
-    }
-
-    public abstract getRequestHeaders(): object
-
-    public abstract getBodyPromiseFromResponse(response): Promise
+    return this.body
+  }
 }

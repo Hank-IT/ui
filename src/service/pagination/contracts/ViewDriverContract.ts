@@ -1,8 +1,7 @@
-export default interface ViewDriverContract {
-    setData(data: object[]): void
+export interface ViewDriverContract<ResourceInterface> {
+    setData(data: ResourceInterface): void
     setTotal(value: number): void
-
-    getData(): object[]
+    getData(): ResourceInterface
     getCurrentPage(): number
     setPage(value: number): void
     setPageSize(value: number): void
@@ -10,5 +9,4 @@ export default interface ViewDriverContract {
     getLastPage(): number
     getPages(): number[]
     getTotal(): number
-    updateItem(matcher: (value: object, index: number) => boolean, updater: (value: object) => object): void
 }
