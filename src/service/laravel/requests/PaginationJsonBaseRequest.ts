@@ -4,9 +4,11 @@ import { type PaginationResponseContract } from '../../pagination/contracts/Pagi
 import { PaginationResponse } from './responses/PaginationResponse'
 
 export abstract class PaginationJsonBaseRequest<
+  ResponseErrorBodyInterface,
   ResourceInterface,
   RequestParamsInterface extends object
 > extends BaseRequest<
+  ResponseErrorBodyInterface,
   PaginationResponseBodyContract<ResourceInterface>,
   PaginationResponseContract<PaginationResponseBodyContract<ResourceInterface>,ResourceInterface>,
   undefined,

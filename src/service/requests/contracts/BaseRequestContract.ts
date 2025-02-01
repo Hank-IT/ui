@@ -3,7 +3,7 @@ import { RequestEvents } from '../RequestEvents.enum'
 import { type BodyFactoryContract } from './BodyFactoryContract'
 import { type HeadersContract } from './HeadersContract'
 
-export type EventHandlerCallback = ((args: Array<unknown>) => void);
+export type EventHandlerCallback<T> = ((value: T) => void);
 
 export interface BaseRequestContract<
   RequestBodyInterface,
@@ -26,7 +26,7 @@ export interface BaseRequestContract<
 
   buildUrl(): URL
 
-  on(event: RequestEvents, handler: EventHandlerCallback): this
+  on<T>(event: RequestEvents, handler: EventHandlerCallback<T>): this
 
   send(): Promise<ResponseClass>
 

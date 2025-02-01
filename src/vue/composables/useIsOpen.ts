@@ -8,15 +8,15 @@ export default function(
   isOpenKey: Ref<number>,
   isOpen: ComputedRef<boolean>,
 } {
-  const internalIsOpen: Ref<boolean> = ref(false)
+  const internalIsOpen = ref<boolean>(false)
 
-  const isOpenKey: Ref<number> = ref(0)
+  const isOpenKey = ref<number>(0)
 
   const isOpen = computed({
-    get() {
+    get(): boolean {
       return internalIsOpen.value
     },
-    set(value: boolean) {
+    set(value: boolean): void {
       // False means we close, so we increment the key
       // Add delay to preserve the closing animation.
       setTimeout(() => {

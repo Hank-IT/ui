@@ -4,7 +4,7 @@ import { type PaginatorLoadDataOptions } from './contracts/PaginatorLoadDataOpti
 
 export class InfiniteScroller<ResourceInterface> extends Paginator<ResourceInterface> {
   protected override passDataToViewDriver(
-    dto: PaginationDataDto<ResourceInterface[]>, options: PaginatorLoadDataOptions
+    dto: PaginationDataDto<ResourceInterface[]>, options: PaginatorLoadDataOptions = {}
   ) {
     const {
       flush = false,

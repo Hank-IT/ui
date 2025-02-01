@@ -4,10 +4,9 @@ import { PaginationResponse } from '../../requests/responses/PaginationResponse'
 import { type PaginateableRequestContract } from '../../../pagination/contracts/PaginateableRequestContract'
 import { type PaginationDataDriverContract } from '../../../pagination/contracts/PaginationDataDriverContract'
 
-type ExtractRequestTypes<T> = T extends PaginationJsonBaseRequest<infer Resource, infer RequestParams>
+type ExtractRequestTypes<T> = T extends PaginationJsonBaseRequest<undefined, infer Resource, object>
   ? {
     Resource: Resource[];
-    RequestParams: RequestParams;
   }
   : never;
 
@@ -18,14 +17,14 @@ export class RequestDriver<
 
   public constructor(protected request: TReq) {}
 
-  public get(pageNumber: number, pageSize: number): Promise<PaginationDataDto<ExtractRequestTypes<TReq>['Resource'][]>> {
+  public get(pageNumber: number, pageSize: number): Promise<PaginationDataDto<ExtractRequestTypes<TReq>['Resource']>> {
     return this.request
       .setPaginationParams(pageNumber, pageSize)
       .send()
       .then(
-        (response: PaginationResponse<ExtractRequestTypes<TReq>['Resource'][]>) => {
-          return new PaginationDataDto<ExtractRequestTypes<TReq>['Resource'][]>(
-            response.getData(), // Typisiert als `Resource[]`
+        (response: PaginationResponse<ExtractRequestTypes<TReq>['Resource']>) => {
+          return new PaginationDataDto<ExtractRequestTypes<TReq>['Resource']>(
+            response.getData(),
             response.getTotal()
           )
         }

@@ -1,4 +1,3 @@
-import { ResponseException } from './ResponseException'
+import { ResponseBodyException } from './ResponseBodyException'
 
-export class NotFoundException extends ResponseException {
-}
+export class NotFoundException<ResponseErrorBody> extends ResponseBodyException<ResponseErrorBody> {}
