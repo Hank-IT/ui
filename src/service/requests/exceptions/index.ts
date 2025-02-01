@@ -5,6 +5,7 @@ import { UnauthorizedException } from './UnauthorizedException'
 import { PageExpiredException } from './PageExpiredException'
 import { ServerErrorException } from './ServerErrorException'
 import { ResponseException } from './ResponseException'
+import { ResponseBodyException } from './ResponseBodyException'
 
 export {
   ValidationException,
@@ -13,5 +14,6 @@ export {
   UnauthorizedException,
   PageExpiredException,
   ServerErrorException,
-  ResponseException
+  ResponseException,
+  ResponseBodyException
 }

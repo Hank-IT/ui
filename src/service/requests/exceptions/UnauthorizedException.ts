@@ -1,5 +1,3 @@
-import { ResponseException } from './ResponseException'
+import { ResponseBodyException } from './ResponseBodyException'
 
-export class UnauthorizedException extends ResponseException {
-
-}
+export class UnauthorizedException<ResponseErrorBody> extends ResponseBodyException<ResponseErrorBody> {}

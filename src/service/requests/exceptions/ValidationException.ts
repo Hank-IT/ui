@@ -1,5 +1,3 @@
-import { ResponseException } from './ResponseException'
+import { ResponseBodyException } from './ResponseBodyException'
 
-export class ValidationException extends ResponseException {
-
-}
+export class ValidationException<ResponseErrorBody> extends ResponseBodyException<ResponseErrorBody> {}

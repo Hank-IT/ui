@@ -16,6 +16,7 @@ import { type ResponseContract } from './contracts/ResponseContract'
 import { mergeDeep } from '../../helpers'
 
 export abstract class BaseRequest<
+  ResponseErrorBody,
   ResponseBodyInterface = undefined,
   ResponseClass extends ResponseContract<ResponseBodyInterface> = BaseResponse<ResponseBodyInterface>,
   RequestBodyInterface = undefined,
@@ -28,6 +29,7 @@ export abstract class BaseRequest<
   protected params: RequestParamsInterface | undefined = undefined
   protected requestBody: RequestBodyInterface | undefined = undefined
   protected loadingStateDriver: LoadingStateContract | undefined = undefined
+  /* @ts-expect-error Ignore generics */
   protected events: { [key in RequestEvents]?: EventHandlerCallback[] } = {};
 
   protected static defaultBaseUrl: string
@@ -97,7 +99,7 @@ export abstract class BaseRequest<
     return new URL(url, this.baseUrl() ?? BaseRequest.defaultBaseUrl)
   }
 
-  public on(event: RequestEvents, handler: EventHandlerCallback): this {
+  public on<T>(event: RequestEvents, handler: EventHandlerCallback<T>): this {
     if (!this.events[event]) {
       this.events[event] = []
     }
@@ -107,17 +109,16 @@ export abstract class BaseRequest<
     return this
   }
 
-  protected dispatch(event: RequestEvents, ...args: Array<unknown>) {
+  protected dispatch<T>(event: RequestEvents, value: T) {
     if (!this.events[event]) {
       return
     }
 
-    // @ts-expect-error Spread operator causes problems
-    this.events[event].forEach((handler: EventHandlerCallback) => handler(...args))
+    this.events[event].forEach((handler: EventHandlerCallback<T>) => handler(value))
   }
 
   public async send(): Promise<ResponseClass> {
-    this.dispatch(RequestEvents.LOADING, true)
+    this.dispatch<boolean>(RequestEvents.LOADING, true)
 
     this.loadingStateDriver?.setLoading(true)
 
@@ -140,18 +141,18 @@ export abstract class BaseRequest<
       await responseSkeleton.setResponse(responseHandler)
 
       return responseSkeleton
-    }).catch(error => {
+    }).catch(async error => {
       if (error instanceof ResponseException) {
-        new ErrorHandler(error)
+        const handler = new ErrorHandler<ResponseErrorBody>(error.getResponse())
 
-        Promise.resolve()
+        await handler.handle()
       }
 
       console.error('HankIT-UI: Unknown error received.', error)
 
       throw error
     }).finally(() => {
-      this.dispatch(RequestEvents.LOADING, false)
+      this.dispatch<boolean>(RequestEvents.LOADING, false)
       this.loadingStateDriver?.setLoading(false)
     })
   }

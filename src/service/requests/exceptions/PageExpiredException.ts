@@ -1,5 +1,3 @@
-import { ResponseException } from './ResponseException'
+import { ResponseBodyException } from './ResponseBodyException'
 
-export class PageExpiredException extends ResponseException {
-
-}
+export class PageExpiredException<ResponseErrorBody> extends ResponseBodyException<ResponseErrorBody> {}

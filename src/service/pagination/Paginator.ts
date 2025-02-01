@@ -16,7 +16,7 @@ export class Paginator<ResourceInterface> {
   }
 
   public constructor(
-    protected dataDriver: PaginationDataDriverContract<ResourceInterface>,
+    protected dataDriver: PaginationDataDriverContract<ResourceInterface[]>,
     pageNumber: number = 1,
     pageSize: number = 10
   ) {

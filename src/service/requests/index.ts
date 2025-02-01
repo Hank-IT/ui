@@ -18,6 +18,7 @@ import { type PaginationParamsContract } from '../laravel/pagination/contracts/P
 import { type ViewLoaderFactoryContract } from './contracts/ViewLoaderFactoryContract'
 import { type DriverConfigContract } from './contracts/DriverConfigContract'
 import { type BodyFactoryContract } from './contracts/BodyFactoryContract'
+import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
 import { ResponseException } from './exceptions/ResponseException'
 
 export {
@@ -44,5 +45,6 @@ export type {
   BodyContract,
   ViewLoaderFactoryContract,
   DriverConfigContract,
-  BodyFactoryContract
+  BodyFactoryContract,
+  ResponseHandlerContract
 }
