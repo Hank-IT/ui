@@ -1,260 +1,127 @@
-# Requirements
-While this library can be used with any frontend, it includes Vue 3 support out of box and assumes the usage of Vue 3 in the documentation.
+# Library Overview
 
-## Requests
-This library supports fetch as a driver to make requests.
+This library can be integrated with any frontend framework. It comes with built-in support for Vue 3, which is assumed
+throughout the documentation.
 
-## Request driver
+## Request Handling
 
-### Fetch
-``` typescript
-import { BaseRequest, FetchDriver } from '@hank-it/ui/service/requests'
+The library leverages a fetch-based driver to perform HTTP requests. The following sections explain how to initialize
+the request driver and define custom requests.
 
-BaseRequest.setRequestDriver(new FetchDriver)
+---
+
+## Initializing the Request Driver
+
+Before making any requests, you must initialize the appropriate request driver. This is done during your application's
+boot process by using the static `setRequestDriver` method.
+
+### Using the Fetch Driver
+
+To set up the fetch driver, import `BaseRequest` and `FetchDriver` from '@hank-it/ui/service/requests' and initialize
+the driver as shown:
+
+```typescript
+import { BaseRequest, FetchDriver } from '@hank-it/ui/service/requests';
+
+BaseRequest.setRequestDriver(new FetchDriver());
 ```
 
-You may enable credential support using:
-``` typescript
+### Enabling Credential Support
+
+If your requests need to include credentials (e.g., cookies for cross-origin requests), enable credential support as
+follows:
+
+```typescript
 BaseRequest.setRequestDriver(new FetchDriver({
-    corsWithCredentials: true
-}))
+    corsWithCredentials: true,
+}));
 ```
 
-## Defining requests
-Each requests requires its own class:
+### Adding Global Headers
 
-``` typescript
-import { BaseRequest, type ResponseContract, JsonResponse } from '@hank-it/ui/service/requests'
+To include headers such as a CSRF token with every request, define them globally:
 
-export class GetCustomersRequest extends BaseRequest {
-  public method(): string {
-    return 'GET'
-  }
-
-  public url(): string {
-    return '/api/v1/customers'
-  }
-  
-  public getResponse() {
-    return new JsonResponse
-  }
-}
+```typescript
+BaseRequest.setRequestDriver(new FetchDriver({
+    headers: {
+        'X-XSRF-TOKEN': <token>,
+    },
+}));
 ```
 
-## Requests with data handler and typed response
-Each requests requires its own class:
+---
 
-``` typescript
-import { BaseRequest, JsonResponse } from '@hank-it/ui/service/requests'
+## Defining Requests
 
-export interface CustomerResource {
-  id: string,
-  first_name: string,
-  last_name: string,
-  email: string,
+Each API endpoint is represented as a separate class that extends `BaseRequest`. This class specifies the HTTP Method,
+URL, and the expected request/response types.
+
+### Example: Expense Index Request
+
+The following example demonstrates how to define a GET request to the `/api/v1/expenses` endpoint:
+
+```typescript
+import { BaseRequest, RequestMethodEnum, JsonResponse } from '@hank-it/ui/service/requests';
+
+export interface GenericResponseErrorInterface {
+    message: string;
 }
 
-export class GetCustomersResponse extends JsonResponse {
-  public dataHandler(body): CustomerResource[] {
-    return body.data
-  }
+export interface ExpenseIndexRequestParams {
+    filter?: {
+        search_text?: string;
+    };
 }
 
-export class GetCustomersRequest extends BaseRequest {
-  method(): string {
-    return 'GET'
-  }
-
-  url(): string {
-    return '/api/v1/customers'
-  }
-  
-  protected getResponse() {
-    return new GetCustomersResponse
-  }
+export interface ExpenseResource {
+    id: string;
+// other data fields
 }
-```
 
-### Defining paginatable requests
-``` typescript
-import { BaseRequest, type PaginatableRequest, type ResponseContract, JsonResponse } from '@hank-it/ui/service/requests'
-import type {PaginationResponseContract} from '@hank-it/ui/service/pagination'
+export interface ExpenseIndexRequestResponseBody {
+    data: ExpenseResource[];
+}
 
-export class GetProductsRequestResponse extends JsonResponse implements PaginationResponseContract {
-    public getTotal(): number {
-        return this.body.total
+export class ExpenseIndexRequest extends BaseRequest<
+        GenericResponseErrorInterface,
+        ExpenseIndexRequestResponseBody,
+        JsonResponse<ExpenseIndexRequestResponseBody>,
+        undefined,
+        ExpenseIndexRequestParams
+> {
+    public method(): RequestMethodEnum {
+        return RequestMethodEnum.GET;
     }
 
-    public dataHandler(body) {
-        return body.products
+    public url(): string {
+        return '/api/v1/expenses';
     }
 }
-
-export class GetCustomersRequest extends BaseRequest implements PaginatableRequest {
-  method(): string {
-    return 'GET'
-  }
-
-  url(): string {
-     return 'https://dummyjson.com/products'
-  }
-  
-  public setPaginationParams(page: number, size: number): BaseRequest {
-      return this.withParams({
-          skip: (page - 1) * size,
-          limit: size,
-      })
-  }
-  
-  protected getResponse() {
-     return new GetProductsRequestResponse
-  }
-}
 ```
 
-### Sending requests
+### Explanation
 
-#### Generic get request
-``` typescript
-import { RequestBaseException } from '@hank-it/ui/service/requests/exceptions'
+- **HTTP Method**: Uses `GET` to retrieve data from the `/api/v1/expenses` endpoint.
+- **Error Handling**: On failure (4XX/5XX status codes), the response will conform to `GenericResponseErrorInterface`.
+- **Success Response**: A successful response is expected to follow the `ExpenseIndexRequestResponseBody` interface.
+- **Response Format**: The response is of type JSON, as indicated by `JsonResponse`.
+- **Request Body**: Since this is a GET request, the body is `undefined`.
+- **Query Parameters**: Accepts query parameters that match the `ExpenseIndexRequestParams` interface.
 
-new GetCustomersRequest()
-    .send()
-    .then(data => {
-        // Do something with data
-    })
-    .catch((exception: RequestBaseException) => {
-        exception.getError().getBodyPromise().then(bodyContent => {
-            // errors are in bodyContent
-        })
-    })
+---
+
+## Sending the Request
+
+Once the request is defined, you can send it using the following code:
+
+```typescript
+const request = new ExpenseIndexRequest();
+
+// The response type and body are inferred automatically.
+request.send().then((response: JsonResponse<ExpenseIndexRequestResponseBody>) => {
+    const body = response.getBody(); // Type: ExpenseIndexRequestResponseBody
+});
 ```
 
-You may also access the raw response or the status code:
-``` typescript
-new GetCustomersRequest()
-    .send()
-    .then(response => {
-        response.getData() // Data converted by the response class
-        response.getBody() // Data before being converted by the response class
-    })
-```
-
-#### Posting json data
-``` typescript
-// This is the json content for the request
-const content = new JsonBody({
-  email: "username",
-  password: "password",
-})
-
-new UserLoginRequest()
-  .setBody(content)
-  .send()
-  .then(result: ResponseContract => {
-    // Do something with result
-  })
-```
-
-#### Posting json data with typescript
-``` typescript
-import { BaseRequest, JsonResponse } from '@hank-it/ui/service/requests'
-
-export interface AuthPayload {
-  username: string,
-  password: string,
-}
-
-export class AuthJsonContent extends JsonBody {
-  public constructor(protected data: AuthPayload) {}
-}
-
-export class UserLoginRequest extends BaseRequest {
-  method(): string {
-    return 'POST'
-  }
-
-  url(): string {
-    return '/api/v1/login'
-  }
-
-  public getResponse() {
-    return new JsonResponse
-  }
-}
-
-// This is the json content for the request
-const content = new AuthJsonContent({
-  username: "username",
-  password: "password",
-})
-
-new UserLoginRequest()
-  .setBody(content)
-  .send()
-  .then(result => {
-    // Do something with result
-  })
-```
-
-### Posting form data (File uploading)
-You may use any request to upload files:
-``` typescript
-const file = ref()
-
-function submit() {
-  const content = new FormDataBody({
-    file: file.value.files[0],
-  })
-
-  new UploadInboxItemRequest()
-    .setBody(content)
-    .send()
-    .then(result: ResponseContract => {
-       // Do something with result
-    })
-}
-```
-
-Uploading multiple files is supported by simply passing an array of files.
-
-## Pagination with Array source
-
-``` typescript
-// This is our data source
-const rows = [
-  {
-    color: "red",
-    value: "#f00"
-  },
-  ...
-  {
-    color: "black",
-    value: "#000"
-  }
-]
-
-// Booting
-BaseRequest.setRequestDriver(new FetchDriver)
-BaseRequest.setLoaderStateFactory(new VueLoaderDriverFactory)
-Paginator.setViewDriverFactory(new VuePaginationDriverFactory)
-
-const paginator = new Paginator(new ArrayDriver(rows))
-
-// Make the paginator prepare the first page 
-paginator.init(1, 10)
-```
-
-## Pagination with Request source
-You may use any request that implements the ``PaginatableRequest`` interface as data source:
-
-``` typescript
-// This is the request we want to paginate. Make sure you 
-// implement the "PaginatableRequest" interface for this to work.
-const getInboxItemsRequest = new GetInboxItemsRequest
-
-const paginator = new Paginator( new RequestDriver(getInboxItemsRequest))
-
-// Make the paginator prepare the first page 
-paginator.init(1, 10)
-```
+This completes the setup and usage of the request driver and custom requests. You can now use these patterns to create
+additional requests as needed.

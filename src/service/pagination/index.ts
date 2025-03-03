@@ -7,6 +7,7 @@ import { type PaginateableRequestContract } from './contracts/PaginateableReques
 import { type PaginationResponseContract } from './contracts/PaginationResponseContract'
 import { type PaginationDataDriverContract } from './contracts/PaginationDataDriverContract'
 import { getDisplayablePages } from '../../helpers'
+import { ArrayDriver } from './dataDrivers/ArrayDriver'
 
 export {
   PaginationDataDto,
@@ -14,7 +15,8 @@ export {
   Paginator,
   InfiniteScroller,
   VuePaginationDriverFactory,
-  getDisplayablePages
+  getDisplayablePages,
+  ArrayDriver,
 }
 
 export type {
