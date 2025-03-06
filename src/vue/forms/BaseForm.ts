@@ -1,4 +1,4 @@
-import { reactive, computed, toRaw, type ComputedRef } from 'vue'
+import { reactive, computed, toRaw, type ComputedRef, watch } from 'vue'
 import { camelCase, upperFirst, cloneDeep, isEqual } from 'lodash-es'
 import { type PersistedForm } from './types/PersistedForm'
 import { NonPersistentDriver } from './drivers/NonPersistentDriver'
@@ -48,7 +48,7 @@ export abstract class BaseForm<
    * The default is a NonPersistentDriver.
    * Child classes can override this method to return a different driver.
    */
-  protected getPersistenceDriver(): PersistenceDriver {
+  protected getPersistenceDriver(_suffix: string | undefined): PersistenceDriver {
     return new NonPersistentDriver()
   }
 
@@ -66,23 +66,26 @@ export abstract class BaseForm<
         }
       }
       return dirty
-    } else {
-      return !isEqual(current, original)
     }
+
+    return !isEqual(current, original)
   }
 
-  protected constructor(defaults: FormBody, options?: { persist?: boolean }) {
+  protected constructor(defaults: FormBody, protected options?: { persist?: boolean, persistSuffix?: string }) {
     const persist = options?.persist !== false
     let initialData: FormBody
-    const driver = this.getPersistenceDriver()
+    const driver = this.getPersistenceDriver(options?.persistSuffix)
 
     if (persist) {
       const persisted = driver.get<FormBody>(this.constructor.name)
-      if (persisted) {
+      // If persisted exists and its "original" matches the new defaults,
+      // use the persisted state otherwise, discard it.
+      if (persisted && isEqual(defaults, persisted.original)) {
         initialData = persisted.state
         this.original = cloneDeep(persisted.original)
         this.dirty = reactive(persisted.dirty) as Record<keyof FormBody, boolean | any[]>
       } else {
+        // Discard persisted data: use new defaults as the baseline.
         initialData = defaults
         this.original = cloneDeep(defaults)
         const initDirty: Partial<Record<keyof FormBody, boolean | any[]>> = {}
@@ -105,6 +108,8 @@ export abstract class BaseForm<
           }
         }
         this.dirty = reactive(initDirty) as Record<keyof FormBody, boolean | any[]>
+
+        driver.remove(this.constructor.name)
       }
     } else {
       initialData = defaults
@@ -155,11 +160,17 @@ export abstract class BaseForm<
     }
 
     if (persist) {
-      driver.set(this.constructor.name, {
-        state: toRaw(this.state),
-        original: toRaw(this.original),
-        dirty: toRaw(this.dirty)
-      } as PersistedForm<FormBody>)
+      watch(
+        () => this.state,
+        () => {
+          driver.set(this.constructor.name, {
+            state: toRaw(this.state),
+            original: toRaw(this.original),
+            dirty: toRaw(this.dirty)
+          } as PersistedForm<FormBody>)
+        },
+        { deep: true, immediate: true }
+      )
     }
   }
 
@@ -189,7 +200,7 @@ export abstract class BaseForm<
   }
 
   public fillState(data: Partial<FormBody>): void {
-    const driver = this.getPersistenceDriver()
+    const driver = this.getPersistenceDriver(this.options?.persistSuffix)
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key) && key in this.state) {
         const currentVal = this.state[key]
@@ -255,17 +266,19 @@ export abstract class BaseForm<
     const payload = {} as RequestBody
     for (const key in this.state) {
       const getterName = 'get' + upperFirst(camelCase(key))
+      const typedKey = key as unknown as keyof RequestBody
       if (typeof (this as any)[getterName] === 'function') {
-        payload[key as keyof RequestBody] = (this as any)[getterName](this.state[key])
+        payload[typedKey] = (this as any)[getterName](this.state[key])
       } else {
-        payload[key as keyof RequestBody] = this.transformValue(this.state[key], key)
+        payload[typedKey] = this.transformValue(this.state[key], key)
       }
+
     }
     return payload
   }
 
   public reset(): void {
-    const driver = this.getPersistenceDriver()
+    const driver = this.getPersistenceDriver(this.options?.persistSuffix)
     for (const key in this.state) {
       if (Array.isArray(this.original[key])) {
         this.state[key] = cloneDeep(this.original[key]);
@@ -279,9 +292,9 @@ export abstract class BaseForm<
               }
             }
             return initialDirty
-          } else {
-            return false
           }
+
+          return false
         })
       } else {
         this.state[key] = cloneDeep(this.original[key])
@@ -302,7 +315,7 @@ export abstract class BaseForm<
   }
 
   public addToArrayProperty(property: keyof FormBody, newElement: any): void {
-    const driver = this.getPersistenceDriver()
+    const driver = this.getPersistenceDriver(this.options?.persistSuffix)
     const arr = this.state[property]
     if (!Array.isArray(arr)) {
       throw new Error(`Property "${String(property)}" is not an array.`)
@@ -350,27 +363,33 @@ export abstract class BaseForm<
             for (const innerKey in item) {
               elementProps[innerKey] = {
                 model: computed({
-                  get: () => this.state[key][index][innerKey],
+                  get: () => ((this.state[key] as unknown as any[])[index] as any)[innerKey],
                   set: (newVal) => {
-                    this.state[key][index][innerKey] = newVal
-                    const updatedElement = this.state[key][index]
-                    const originalElement = this.original[key][index]
-                    this.dirty[key][index] = this.computeDirtyState(updatedElement, originalElement)
+                    ((this.state[key] as unknown) as any[])[index][innerKey] = newVal
+                    const updatedElement = ((this.state[key] as unknown) as any[])[index]
+                    const originalElement = ((this.original[key] as unknown) as any[])[index];
+                    ((this.dirty[key] as any[]))[index] = this.computeDirtyState(updatedElement, originalElement)
                   },
                 }),
                 errors: (this._errors[key] && this._errors[key][index] && this._errors[key][index][innerKey]) || [],
                 suggestions: (this._suggestions[key] && this._suggestions[key][index] && this._suggestions[key][index][innerKey]) || [],
-                dirty: (this.dirty[key] && this.dirty[key][index] && typeof this.dirty[key][index] === 'object' ? this.dirty[key][index][innerKey] : false),
+                dirty: (
+                  Array.isArray(this.dirty[key]) &&
+                  this.dirty[key][index] &&
+                  typeof (this.dirty[key] as any[])[index] === 'object'
+                    ? (this.dirty[key] as any[])[index][innerKey]
+                    : false
+                ),
               }
             }
           } else {
             elementProps.value = {
               model: computed({
-                get: () => this.state[key][index],
+                get: () => ((this.state[key] as unknown) as any[])[index],
                 set: (newVal) => {
-                  this.state[key][index] = newVal
-                  const updatedValue = this.state[key][index]
-                  const originalValue = this.original[key][index]
+                  ((this.state[key] as unknown) as any[])[index] = newVal
+                  const updatedValue = ((this.state[key] as unknown) as any[])[index]
+                  const originalValue = ((this.original[key] as unknown) as any[])[index];
                   (this.dirty[key] as boolean[])[index] = !isEqual(updatedValue, originalValue)
                 },
               }),

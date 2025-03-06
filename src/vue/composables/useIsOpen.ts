@@ -1,4 +1,4 @@
-import { ref, computed, type Ref, type ComputedRef } from 'vue'
+import { ref, computed, type Ref, type WritableComputedRef } from 'vue'
 
 export default function(
   callback: (value: boolean) => void = () => {
@@ -6,7 +6,7 @@ export default function(
   delay: number = 500
 ): {
   isOpenKey: Ref<number>,
-  isOpen: ComputedRef<boolean>,
+  isOpen: WritableComputedRef<boolean>,
 } {
   const internalIsOpen = ref<boolean>(false)
 

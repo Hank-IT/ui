@@ -6,7 +6,7 @@ import { type PaginationDataDriverContract } from '../../../pagination/contracts
 
 type ExtractRequestTypes<T> = T extends PaginationJsonBaseRequest<undefined, infer Resource, object>
   ? {
-    Resource: Resource[];
+    Resource: Resource;
   }
   : never;
 
