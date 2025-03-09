@@ -314,7 +314,7 @@ export abstract class BaseForm<
     } as PersistedForm<FormBody>)
   }
 
-  public addToArrayProperty(property: keyof FormBody, newElement: any): void {
+  protected addToArrayProperty(property: keyof FormBody, newElement: any): void {
     const driver = this.getPersistenceDriver(this.options?.persistSuffix)
     const arr = this.state[property]
     if (!Array.isArray(arr)) {
@@ -350,6 +350,22 @@ export abstract class BaseForm<
       original: toRaw(this.original),
       dirty: toRaw(this.dirty)
     } as PersistedForm<FormBody>)
+  }
+
+  protected removeArrayItem(arrayIndex: string, filter): void {
+    this.state[arrayIndex] = this.state[arrayIndex].filter((item: unknown): boolean => {
+      return filter(item)
+    })
+  }
+
+  protected resetArrayCounter(arrayIndex: string, counterIndex: string): void {
+    let count = 1
+
+    this.state[arrayIndex].forEach((item: unknown): void => {
+      item[counterIndex] = count
+
+      count++
+    })
   }
 
   public get properties(): { [K in keyof FormBody]: any } {
