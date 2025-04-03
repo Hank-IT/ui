@@ -1,7 +1,7 @@
 import { ResponseException } from '../../exceptions/ResponseException'
 import { FetchResponse } from './FetchResponse'
 import { RequestMethodEnum } from '../../RequestMethod.enum'
-import { type HeadersContract } from '../../contracts/HeadersContract'
+import { type HeadersContract, HeaderValue } from '../../contracts/HeadersContract'
 import { type BodyContract } from '../../contracts/BodyContract'
 import { type RequestDriverContract } from '../../contracts/RequestDriverContract'
 import { type DriverConfigContract } from '../../contracts/DriverConfigContract'
@@ -50,8 +50,10 @@ export class FetchDriver implements RequestDriverContract {
       ...body?.getHeaders()
     }
 
+    const resolvedHeaders = this.resolveHeaders(mergedHeaders);
+
     const fetchConfig = this.buildRequestConfig(
-      mergedConfig, method, mergedHeaders, body
+      mergedConfig, method, resolvedHeaders, body
     )
 
     const response = await fetch(url, fetchConfig as RequestInit)
@@ -73,7 +75,7 @@ export class FetchDriver implements RequestDriverContract {
   ): FetchDriverConfig {
     return {
       method: method,
-      headers: headers,
+      headers: headers ,
       credentials: this.getCorsWithCredentials(config.corsWithCredentials),
       signal: config.abortSignal ?? undefined,
       body: ['GET', 'HEAD'].includes(method) ? undefined : body?.getContent()
@@ -99,5 +101,20 @@ export class FetchDriver implements RequestDriverContract {
 
     // Fallback to safe option if no default set
     return FetchDriverCredentialConfigEnum.OMIT
+  }
+
+  protected resolveHeaders(headers: HeadersContract): HeadersContract {
+    const resolved: HeadersContract = {}
+    for (const key in headers) {
+      const value: HeaderValue | undefined = headers[key]
+
+      if (value === undefined) {
+        continue
+      }
+
+      resolved[key] = typeof value === 'function' ? value() : value
+    }
+
+    return resolved
   }
 }

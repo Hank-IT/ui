@@ -1,3 +1,5 @@
+export type HeaderValue = string | (() => string)
+
 export interface HeadersContract {
-  [key: string]: string
+  [key: string]: HeaderValue
 }
