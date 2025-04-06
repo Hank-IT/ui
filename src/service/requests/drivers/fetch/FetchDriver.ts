@@ -5,7 +5,7 @@ import { type HeadersContract, HeaderValue } from '../../contracts/HeadersContra
 import { type BodyContract } from '../../contracts/BodyContract'
 import { type RequestDriverContract } from '../../contracts/RequestDriverContract'
 import { type DriverConfigContract } from '../../contracts/DriverConfigContract'
-import type { ResponseHandlerContract } from '../contracts/ResponseHandlerContract'
+import { type ResponseHandlerContract } from '../contracts/ResponseHandlerContract'
 
 enum FetchDriverCredentialConfigEnum {
   OMIT = 'omit',

@@ -29,6 +29,7 @@ export abstract class BaseRequest<
   protected params: RequestParamsInterface | undefined = undefined
   protected requestBody: RequestBodyInterface | undefined = undefined
   protected loadingStateDriver: LoadingStateContract | undefined = undefined
+  protected abortSignal: AbortSignal | undefined = undefined
   /* @ts-expect-error Ignore generics */
   protected events: { [key in RequestEvents]?: EventHandlerCallback[] } = {};
 
@@ -171,11 +172,19 @@ export abstract class BaseRequest<
     return undefined
   }
 
+  public setAbortSignal(signal: AbortSignal): this {
+    this.abortSignal = signal
+
+    return this
+  }
+
   protected baseUrl(): undefined {
     return undefined
   }
 
   protected getConfig(): DriverConfigContract | undefined {
-    return undefined
+    return {
+      abortSignal: this.abortSignal,
+    }
   }
 }
