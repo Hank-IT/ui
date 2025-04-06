@@ -1,0 +1,4 @@
+export enum BulkRequestEventEnum {
+  REQUEST_SUCCESSFUL = 'REQUEST_SUCCESSFUL',
+  REQUEST_FAILED = 'REQUEST_FAILED'
+}
