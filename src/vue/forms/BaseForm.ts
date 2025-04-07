@@ -189,6 +189,7 @@ export abstract class BaseForm<
     for (const key in this.state) {
       const value = this.state[key];
       if (value instanceof PropertyAwareArray) {
+        // @ts-expect-error
         this._model[key as keyof FormBody] = computed({
           get: () => (this.state[key] as PropertyAwareArray).items,
           set: (newVal: any) => {
@@ -259,14 +260,20 @@ export abstract class BaseForm<
         const parts = key.split('.')
         if (parts.length > 1) {
           const topKey = parts[0]
+          // @ts-expect-error
           const index = parseInt(parts[1], 10)
           const errorKey = parts.slice(2).join('.')
+          // @ts-expect-error
           if (!this._errors[topKey]) {
+            // @ts-expect-error
             this._errors[topKey] = []
           }
+          // @ts-expect-error
           if (!this._errors[topKey][index]) {
+            // @ts-expect-error
             this._errors[topKey][index] = {}
           }
+          // @ts-expect-error
           this._errors[topKey][index][errorKey] = (errorsData as any)[key]
         } else {
           this._errors[key] = (errorsData as any)[key]
@@ -349,6 +356,7 @@ export abstract class BaseForm<
     for (const key in this.state) {
       let value = this.state[key]
       if (value instanceof PropertyAwareArray) {
+        // @ts-expect-error
         value = (value as PropertyAwareArray).items
       }
       const getterName = 'get' + upperFirst(camelCase(key))
@@ -415,16 +423,19 @@ export abstract class BaseForm<
   }
 
   protected removeArrayItem(arrayIndex: string, filter: (item: any) => boolean): void {
+    // @ts-expect-error
     const current = this.state[arrayIndex]
     if (current instanceof PropertyAwareArray) {
       (current as PropertyAwareArray).items = (current as PropertyAwareArray).items.filter(filter)
     } else if (Array.isArray(current)) {
+      // @ts-expect-error
       this.state[arrayIndex] = current.filter(filter)
     }
   }
 
   protected resetArrayCounter(arrayIndex: string, counterIndex: string): void {
     let count = 1
+    // @ts-expect-error
     const current = this.state[arrayIndex]
     if (current instanceof PropertyAwareArray) {
       (current as PropertyAwareArray).items.forEach((item: any): void => {

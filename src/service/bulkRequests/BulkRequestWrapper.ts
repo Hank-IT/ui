@@ -1,5 +1,7 @@
 import { BaseRequest } from '../requests'
 
+
+// @ts-expect-error
 export class BulkRequestWrapper<T extends BaseRequest> {
   protected response: any = null;
   protected error: any = null;

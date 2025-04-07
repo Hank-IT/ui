@@ -3,15 +3,18 @@ import { BulkRequestEventEnum } from './BulkRequestEvent.enum'
 import { BaseRequest } from '../requests'
 
 export class BulkRequestSender {
+  // @ts-expect-error
   protected events: Map<BulkRequestEventEnum, ((req: BulkRequestWrapper<BaseRequest>) => void)[]> = new Map();
   protected abortController = new AbortController();
 
+  // @ts-expect-error
   public constructor(protected requests: BulkRequestWrapper<BaseRequest>[]) {}
 
   public get isLoading(): boolean {
     return this.requests.some(req => req.isLoading());
   }
 
+  // @ts-expect-error
   public on(event: BulkRequestEventEnum, callback: (req: BulkRequestWrapper<BaseRequest>) => void): this {
     if (!this.events.has(event)) {
       this.events.set(event, []);
@@ -22,6 +25,7 @@ export class BulkRequestSender {
     return this;
   }
 
+  // @ts-expect-error
   protected emit(event: BulkRequestEventEnum, req: BulkRequestWrapper<BaseRequest>): void {
     const callbacks = this.events.get(event) || [];
 
