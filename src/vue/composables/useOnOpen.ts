@@ -1,25 +1,34 @@
-import { nextTick, watch } from 'vue'
-import { type ModelValueProps } from '../contracts/ModelValueProps'
-import { type ModelValueOptions } from '../contracts/ModelValueOptions'
+import { nextTick, type Ref, watch } from 'vue'
 
-export type useOnOpenCallback = (() => void) | undefined;
+type Callback = () => void
 
-export default function(props: ModelValueProps, options: ModelValueOptions = {}) {
-  const {
-    name = 'modelValue'
-  } = options
+export default function(ref: Ref<unknown>) {
+  const openCallbacks: Callback[] = []
+  const closeCallbacks: Callback[] = []
 
-  function onOpen(callback: useOnOpenCallback) {
-    watch(() => props[name], () => {
+  watch(
+    () => ref.value,
+    (newValue, oldValue) => {
       nextTick(() => {
-        if (props[name] && callback) {
-          callback()
+        if (newValue && !oldValue) {
+          openCallbacks.forEach(callback => callback())
+        } else if (!newValue && oldValue) {
+          closeCallbacks.forEach(callback => callback())
         }
       })
-    })
+    }
+  )
+
+  function onOpen(callback: Callback): void {
+    openCallbacks.push(callback)
+  }
+
+  function onClose(callback: Callback): void {
+    closeCallbacks.push(callback)
   }
 
   return {
-    onOpen
+    onOpen,
+    onClose
   }
 }
