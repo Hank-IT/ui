@@ -1,58 +1,60 @@
 import { ref, computed, type Ref, type ComputedRef } from 'vue'
+import useIsEmpty from './useIsEmpty'
 
-export default function<T>(
-  defaultValue: T | null = null,
-  delay: number = 500
-): {
-  fromVar: ComputedRef<T | null>, // Computed-Wert für `fromVar`
-  isOpenFromVar: ComputedRef<boolean | T>, // Computed-Wert für `isOpenFromVar` (enthält boolean oder `T`)
-  isOpenFromVarKey: Ref<number>, // Ref-Wert des Counters
+export default function <FromVarType>(
+  defaultValue: FromVarType | undefined = undefined,
+  delay: number = 500): {
+  fromVar: ComputedRef<FromVarType | undefined>,
+  isOpenFromVar: ComputedRef<boolean | FromVarType>,
+  isOpenFromVarKey: Ref<number>,
 } {
-    const isOpenFromVarKey: Ref<number> = ref(0)
+  const isOpenFromVarKey = ref<number>(0)
 
-    const internalIsOpen: Ref<boolean> = ref(false)
+  const { isNotEmpty } = useIsEmpty()
 
-  const internalFromVar = ref<T | null>(defaultValue)
+  const internalIsOpen = ref<boolean>(false)
 
-    const isOpenFromVar = computed({
-        get() {
-            return internalIsOpen.value
-        },
-      set(value: boolean | T) {
-            if (value) {
-                internalIsOpen.value = true
+  const internalFromVar = ref<FromVarType | undefined>(defaultValue)
 
-                internalFromVar.value = value
-            } else {
-                internalIsOpen.value = false
+  const isOpenFromVar = computed({
+    get(): boolean {
+      return internalIsOpen.value
+    },
+    set(value): void {
+      if (value) {
+        internalIsOpen.value = true
 
-                setTimeout(() => {
-                    internalFromVar.value = defaultValue
+        internalFromVar.value = value
+      } else {
+        internalIsOpen.value = false
 
-                    isOpenFromVarKey.value++
-                }, delay)
-            }
-        }
-    })
+        setTimeout((): void => {
+          internalFromVar.value = defaultValue
 
-    const fromVar = computed({
-        get(): T | null {
-          return internalFromVar.value
-        },
-        set(value: T | null) {
-            if (value) {
-                isOpenFromVar.value = true
-
-                internalFromVar.value = value
-            } else {
-                isOpenFromVar.value = false
-            }
-        }
-    })
-
-    return {
-        fromVar,
-        isOpenFromVar,
-        isOpenFromVarKey,
+          isOpenFromVarKey.value++
+        }, delay)
+      }
     }
+  })
+
+  const fromVar = computed({
+    get(): FromVarType | undefined {
+      return internalFromVar.value
+    },
+    set(value): void {
+      if (isNotEmpty(value)) {
+        isOpenFromVar.value = true
+
+        internalFromVar.value = value
+      } else {
+        isOpenFromVar.value = false
+      }
+    }
+  })
+
+  return {
+    fromVar,
+    isOpenFromVar,
+    isOpenFromVarKey
+  }
 }
