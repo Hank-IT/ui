@@ -88,6 +88,10 @@ export abstract class BaseRequest<
     return this
   }
 
+  public getBody(): RequestBodyInterface | undefined {
+    return this.requestBody
+  }
+
   public requestHeaders(): HeadersContract {
     return {}
   }
