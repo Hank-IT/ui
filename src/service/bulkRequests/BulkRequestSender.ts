@@ -8,7 +8,14 @@ export class BulkRequestSender {
   protected abortController = new AbortController();
 
   // @ts-expect-error
-  public constructor(protected requests: BulkRequestWrapper<BaseRequest>[]) {}
+  public constructor(protected requests: BulkRequestWrapper<BaseRequest>[] = []) {}
+
+  // @ts-expect-error
+  public setRequests(requests: BulkRequestWrapper<BaseRequest>[] = []) {
+    this.requests = requests;
+
+    return this
+  }
 
   public get isLoading(): boolean {
     return this.requests.some(req => req.isLoading());
