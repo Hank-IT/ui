@@ -32,6 +32,12 @@ export class BulkRequestSender {
     return this;
   }
 
+  public off(event: BulkRequestEventEnum): this {
+    this.events.delete(event)
+
+    return this
+  }
+
   // @ts-expect-error
   protected emit(event: BulkRequestEventEnum, req: BulkRequestWrapper<BaseRequest>): void {
     const callbacks = this.events.get(event) || [];
