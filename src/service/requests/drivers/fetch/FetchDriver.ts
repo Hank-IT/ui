@@ -78,7 +78,7 @@ export class FetchDriver implements RequestDriverContract {
       headers: headers ,
       credentials: this.getCorsWithCredentials(config.corsWithCredentials),
       signal: config.abortSignal ?? undefined,
-      body: ['GET', 'HEAD'].includes(method) ? undefined : body?.getContent()
+      body: [RequestMethodEnum.GET, RequestMethodEnum.HEAD].includes(method) ? undefined : body?.getContent()
     }
   }
 
