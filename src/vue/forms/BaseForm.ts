@@ -34,37 +34,35 @@ function restorePropertyAwareArrays<FormBody>(defaults: FormBody, state: FormBod
   for (const key in defaults) {
     const defVal = defaults[key]
     if (defVal instanceof PropertyAwareArray) {
-      // If state[key] is not an instance, assume it’s a plain object and rewrap it.
+      // If state[key] is not an instance, assume it’s a plain array and rewrap it.
       if (!(state[key] instanceof PropertyAwareArray)) {
-        state[key] = new PropertyAwareArray((state[key] as any)?.items || (state[key] as any)) as any
+        state[key] = new PropertyAwareArray(Array.isArray(state[key]) ? state[key] : []) as any
       }
     }
   }
 }
 
+/**
+ * A helper that returns the "inner" value if it looks like a PropertyAwareArray.
+ */
 function propertyAwareDeepEqual(a: any, b: any): boolean {
-  // A helper that returns the "inner" value if it looks like a PropertyAwareArray.
   const getInner = (val: any) => {
-    // If val is an instance of PropertyAwareArray, use its .items.
     if (val instanceof PropertyAwareArray) {
-      return val.items
+      return val // now the array is itself the content
     }
-    // Otherwise, if it's a plain object that has an 'items' property that's an array,
-    // assume it was meant to be a PropertyAwareArray.
+    // If it's a plain object that has an 'items' property that's an array, assume it was meant to be a PropertyAwareArray.
     if (val && typeof val === 'object' && Array.isArray(val.items)) {
       return val.items
     }
     return val
   }
-
   return isEqualWith(a, b, (aValue, bValue) => {
     const normA = getInner(aValue)
     const normB = getInner(bValue)
-    // If either normalization changed the value, compare the normalized ones.
     if (normA !== aValue || normB !== bValue) {
       return isEqual(normA, normB)
     }
-    return undefined  // use default comparison
+    return undefined // use default comparison
   })
 }
 
@@ -116,123 +114,128 @@ export abstract class BaseForm<
   }
 
   protected constructor(defaults: FormBody, protected options?: { persist?: boolean, persistSuffix?: string }) {
-    const persist = options?.persist !== false;
-    let initialData: FormBody;
-    const driver = this.getPersistenceDriver(options?.persistSuffix);
+    const persist = options?.persist !== false
+    let initialData: FormBody
+    const driver = this.getPersistenceDriver(options?.persistSuffix)
 
     if (persist) {
-      const persisted = driver.get<FormBody>(this.constructor.name);
+      const persisted = driver.get<FormBody>(this.constructor.name)
       if (persisted && propertyAwareDeepEqual(defaults, persisted.original)) {
-        initialData = persisted.state;
-        this.original = cloneDeep(persisted.original);
-        this.dirty = reactive(persisted.dirty) as Record<keyof FormBody, boolean | any[]>;
+        initialData = persisted.state
+        this.original = cloneDeep(persisted.original)
+        this.dirty = reactive(persisted.dirty) as Record<keyof FormBody, boolean | any[]>
         // Rewrap persisted values that were originally PropertyAwareArrays:
-        restorePropertyAwareArrays(defaults, initialData);
-        restorePropertyAwareArrays(defaults, this.original);
+        restorePropertyAwareArrays(defaults, initialData)
+        restorePropertyAwareArrays(defaults, this.original)
       } else {
-        console.log("Discarding persisted data for " + this.constructor.name + " because it doesn't match the defaults.");
-        initialData = defaults;
-        this.original = cloneDeep(defaults);
-        const initDirty: Partial<Record<keyof FormBody, boolean | any[]>> = {};
+        console.log("Discarding persisted data for " + this.constructor.name + " because it doesn't match the defaults.")
+        initialData = defaults
+        this.original = cloneDeep(defaults)
+        const initDirty: Partial<Record<keyof FormBody, boolean | any[]>> = {}
         for (const key in defaults) {
-          const value = defaults[key];
+          const value = defaults[key]
           if (value instanceof PropertyAwareArray) {
-            initDirty[key as keyof FormBody] = (value.items as any[]).map(item => {
+            initDirty[key as keyof FormBody] = (value as PropertyAwareArray<unknown>).map((item: unknown) => {
               if (item && typeof item === 'object') {
-                const obj: Record<string, boolean> = {};
+                const obj: Record<string, boolean> = {}
                 for (const k in item) {
                   if (Object.prototype.hasOwnProperty.call(item, k)) {
-                    obj[k] = false;
+                    obj[k] = false
                   }
                 }
-                return obj;
+                return obj
               }
-              return false;
-            });
+              return false
+            })
           } else {
             initDirty[key as keyof FormBody] = false
           }
         }
-        this.dirty = reactive(initDirty) as Record<keyof FormBody, boolean | any[]>;
-        driver.remove(this.constructor.name);
+        this.dirty = reactive(initDirty) as Record<keyof FormBody, boolean | any[]>
+        driver.remove(this.constructor.name)
       }
     } else {
-      initialData = defaults;
-      this.original = cloneDeep(defaults);
-      const initDirty: Partial<Record<keyof FormBody, boolean | any[]>> = {};
+      initialData = defaults
+      this.original = cloneDeep(defaults)
+      const initDirty: Partial<Record<keyof FormBody, boolean | any[]>> = {}
       for (const key in defaults) {
-        const value = defaults[key];
+        const value = defaults[key]
         if (value instanceof PropertyAwareArray) {
-          initDirty[key as keyof FormBody] = (value.items as any[]).map(item => {
+          initDirty[key as keyof FormBody] = (value as PropertyAwareArray<unknown>).map((item: unknown) => {
             if (item && typeof item === 'object') {
-              const obj: Record<string, boolean> = {};
+              const obj: Record<string, boolean> = {}
               for (const k in item) {
                 if (Object.prototype.hasOwnProperty.call(item, k)) {
-                  obj[k] = false;
+                  obj[k] = false
                 }
               }
-              return obj;
+              return obj
             }
-            return false;
-          });
+            return false
+          })
         } else {
           initDirty[key as keyof FormBody] = false
         }
       }
-      this.dirty = reactive(initDirty) as Record<keyof FormBody, boolean | any[]>;
+      this.dirty = reactive(initDirty) as Record<keyof FormBody, boolean | any[]>
     }
 
-    this.state = reactive(initialData) as FormBody;
-    this._model = {} as { [K in keyof FormBody]: ComputedRef<FormBody[K]> };
+    this.state = reactive(initialData) as FormBody
+    this._model = {} as { [K in keyof FormBody]: ComputedRef<FormBody[K]> }
 
     // Create computed models.
     for (const key in this.state) {
-      const value = this.state[key];
+      const value = this.state[key]
       if (value instanceof PropertyAwareArray) {
-        // @ts-expect-error
+        // Now work directly with the array (instead of using `.items`).
         this._model[key as keyof FormBody] = computed({
-          get: () => (this.state[key] as PropertyAwareArray).items,
-          set: (newVal: any) => {
-            (this.state[key] as PropertyAwareArray).items = newVal;
-            this.dirty[key as keyof FormBody] = (newVal as any[]).map(() => false);
+          get: () => this.state[key],
+          set: (newVal: any[]) => {
+            // Update the current array in place.
+            (this.state[key] as PropertyAwareArray<unknown>).splice(
+              0,
+              (this.state[key] as PropertyAwareArray<unknown>).length,
+              ...newVal
+            )
+            this.dirty[key as keyof FormBody] = newVal.map(() => false)
             if (persist) {
               driver.set(this.constructor.name, {
                 state: toRaw(this.state),
                 original: toRaw(this.original),
                 dirty: toRaw(this.dirty)
-              } as PersistedForm<FormBody>);
+              } as PersistedForm<FormBody>)
             }
           }
-        });
+        })
       } else {
         this._model[key as keyof FormBody] = computed({
           get: () => this.state[key],
           set: (value: FormBody[typeof key]) => {
-            this.state[key] = value;
-            this.dirty[key as keyof FormBody] = this.computeDirtyState(value, this.original[key]);
+            this.state[key] = value
+            this.dirty[key as keyof FormBody] = this.computeDirtyState(value, this.original[key])
             if (persist) {
               driver.set(this.constructor.name, {
                 state: toRaw(this.state),
                 original: toRaw(this.original),
                 dirty: toRaw(this.dirty)
-              } as PersistedForm<FormBody>);
+              } as PersistedForm<FormBody>)
             }
           }
-        });
+        })
       }
     }
 
     // Add a deep watch for plain arrays to update the dirty state if in-place changes occur.
     for (const key in this.state) {
-      const value = this.state[key];
+      const value = this.state[key]
       if (Array.isArray(value) && !(value instanceof PropertyAwareArray)) {
         watch(
           () => this.state[key],
           (newVal) => {
-            this.dirty[key as keyof FormBody] = this.computeDirtyState(newVal, this.original[key]);
+            this.dirty[key as keyof FormBody] = this.computeDirtyState(newVal, this.original[key])
           },
           { deep: true }
-        );
+        )
       }
     }
 
@@ -244,10 +247,10 @@ export abstract class BaseForm<
             state: toRaw(this.state),
             original: toRaw(this.original),
             dirty: toRaw(this.dirty)
-          } as PersistedForm<FormBody>);
+          } as PersistedForm<FormBody>)
         },
         { deep: true, immediate: true }
-      );
+      )
     }
   }
 
@@ -289,12 +292,12 @@ export abstract class BaseForm<
         const currentVal = this.state[key]
         const newVal = data[key]
         if (currentVal instanceof PropertyAwareArray) {
-          if (Array.isArray(newVal)) {
-            (this.state[key] as PropertyAwareArray).items = newVal
-          } else if (newVal instanceof PropertyAwareArray) {
-            (this.state[key] as PropertyAwareArray).items = newVal.items
-          }
-          this.dirty[key as keyof FormBody] = ((this.state[key] as PropertyAwareArray).items as any[]).map(() => false)
+          (this.state[key] as PropertyAwareArray<unknown>).splice(
+            0,
+            (this.state[key] as PropertyAwareArray<unknown>).length,
+            ...newVal as Array<unknown>
+          )
+          this.dirty[key as keyof FormBody] = (this.state[key] as PropertyAwareArray<unknown>).map(() => false)
         } else if (Array.isArray(newVal) && Array.isArray(currentVal)) {
           if (newVal.length === currentVal.length) {
             this.state[key] = deepMergeArrays(currentVal, newVal) as any
@@ -328,37 +331,32 @@ export abstract class BaseForm<
 
   private transformValue(value: any, parentKey?: string): any {
     if (value instanceof PropertyAwareArray) {
-      return (value as PropertyAwareArray).items.map(item => this.transformValue(item, parentKey));
+      return value.map(item => this.transformValue(item, parentKey))
     }
     if (Array.isArray(value)) {
-      // For plain arrays, you might want to map them too:
-      return value.map(item => this.transformValue(item, parentKey));
+      return value.map(item => this.transformValue(item, parentKey))
     } else if (value && typeof value === 'object') {
-      const result: any = {};
+      const result: any = {}
       for (const prop in value) {
         if (parentKey) {
-          const compositeMethod = 'get' + upperFirst(parentKey) + upperFirst(camelCase(prop));
+          const compositeMethod = 'get' + upperFirst(parentKey) + upperFirst(camelCase(prop))
           if (typeof (this as any)[compositeMethod] === 'function') {
-            result[prop] = (this as any)[compositeMethod](value[prop]);
-            continue;
+            result[prop] = (this as any)[compositeMethod](value[prop])
+            continue
           }
         }
-        // Pass the parentKey along so that nested objects still use it.
-        result[prop] = this.transformValue(value[prop], parentKey);
+        result[prop] = this.transformValue(value[prop], parentKey)
       }
-      return result;
+      return result
     }
-    return value;
+    return value
   }
 
   public buildPayload(): RequestBody {
     const payload = {} as RequestBody
     for (const key in this.state) {
       let value = this.state[key]
-      if (value instanceof PropertyAwareArray) {
-        // @ts-expect-error
-        value = (value as PropertyAwareArray).items
-      }
+
       const getterName = 'get' + upperFirst(camelCase(key))
       const typedKey = key as unknown as keyof RequestBody
       if (typeof (this as any)[getterName] === 'function') {
@@ -374,9 +372,14 @@ export abstract class BaseForm<
     const driver = this.getPersistenceDriver(this.options?.persistSuffix)
     for (const key in this.state) {
       if (this.state[key] instanceof PropertyAwareArray) {
-        const originalValue = this.original[key] as PropertyAwareArray
-        (this.state[key] as PropertyAwareArray).items = cloneDeep(originalValue.items)
-        this.dirty[key as keyof FormBody] = ((this.state[key] as PropertyAwareArray).items as any[]).map(() => false)
+        // Update the array in place with a clone of the original array.
+        (this.state[key] as PropertyAwareArray<unknown>).splice(
+          0,
+          (this.state[key] as PropertyAwareArray<unknown>).length,
+          ...cloneDeep(this.original[key]) as Array<unknown>
+        );
+
+        this.dirty[key as keyof FormBody] = (this.state[key] as PropertyAwareArray<unknown>).map(() => false)
       } else if (Array.isArray(this.original[key])) {
         this.state[key] = cloneDeep(this.original[key])
         this.dirty[key as keyof FormBody] = this.computeDirtyState(this.state[key], this.original[key])
@@ -402,7 +405,7 @@ export abstract class BaseForm<
     const driver = this.getPersistenceDriver(this.options?.persistSuffix)
     const arr = this.state[property]
     if (arr instanceof PropertyAwareArray) {
-      (arr as PropertyAwareArray).items.push(newElement)
+      arr.push(newElement)
       driver.set(this.constructor.name, {
         state: toRaw(this.state),
         original: toRaw(this.original),
@@ -426,7 +429,8 @@ export abstract class BaseForm<
     // @ts-expect-error
     const current = this.state[arrayIndex]
     if (current instanceof PropertyAwareArray) {
-      (current as PropertyAwareArray).items = (current as PropertyAwareArray).items.filter(filter)
+      const filtered = current.filter(filter);
+      (current as PropertyAwareArray<unknown>).splice(0, current.length, ...filtered)
     } else if (Array.isArray(current)) {
       // @ts-expect-error
       this.state[arrayIndex] = current.filter(filter)
@@ -438,7 +442,7 @@ export abstract class BaseForm<
     // @ts-expect-error
     const current = this.state[arrayIndex]
     if (current instanceof PropertyAwareArray) {
-      (current as PropertyAwareArray).items.forEach((item: any): void => {
+      current.forEach((item: any): void => {
         item[counterIndex] = count
         count++
       })
@@ -455,23 +459,25 @@ export abstract class BaseForm<
     for (const key in this.state) {
       const value = this.state[key]
       if (value instanceof PropertyAwareArray) {
-        props[key] = (value as PropertyAwareArray).items.map((item, index) => {
+        props[key] = value.map((item, index) => {
           const elementProps: any = {}
           if (item && typeof item === 'object') {
             for (const innerKey in item) {
               elementProps[innerKey] = {
                 model: computed({
-                  get: () =>
-                    ((this.state[key] as PropertyAwareArray).items[index] as any)[innerKey],
+                  get: () => ((this.state[key] as PropertyAwareArray<unknown>)[index] as any)[innerKey],
                   set: (newVal) => {
-                    ((this.state[key] as PropertyAwareArray).items[index] as any)[innerKey] = newVal
-                    const updatedElement = ((this.state[key] as PropertyAwareArray).items[index] as any)
-                    const originalElement = ((this.original[key] as PropertyAwareArray).items[index] as any);
-                    ((this.dirty[key] as any[]))[index] = this.computeDirtyState(updatedElement, originalElement)
+                    ((this.state[key] as PropertyAwareArray<unknown>)[index] as any)[innerKey] = newVal
+                    const updatedElement = ((this.state[key] as PropertyAwareArray<unknown>)[index] as any)
+                    const originalElement = ((this.original[key] as PropertyAwareArray<unknown>)[index] as any);
+                    ((this.dirty[key] as any[]))[index] = this.computeDirtyState(updatedElement, originalElement);
                   }
                 }),
-                errors: (this._errors[key] && this._errors[key][index] && this._errors[key][index][innerKey]) || [],
-                suggestions: (this._suggestions[key] && this._suggestions[key][index] && this._suggestions[key][index][innerKey]) || [],
+                errors:
+                  (this._errors[key] && this._errors[key][index] && this._errors[key][index][innerKey]) || [],
+                suggestions:
+                  (this._suggestions[key] && this._suggestions[key][index] && this._suggestions[key][index][innerKey]) ||
+                  [],
                 dirty:
                   Array.isArray(this.dirty[key]) &&
                   this.dirty[key][index] &&
@@ -483,11 +489,11 @@ export abstract class BaseForm<
           } else {
             elementProps.value = {
               model: computed({
-                get: () => ((this.state[key] as PropertyAwareArray).items[index] as any),
+                get: () => ((this.state[key] as PropertyAwareArray<unknown>)[index] as any),
                 set: (newVal) => {
-                  ((this.state[key] as PropertyAwareArray).items[index] = newVal)
-                  const updatedValue = ((this.state[key] as PropertyAwareArray).items[index] as any)
-                  const originalValue = ((this.original[key] as PropertyAwareArray).items[index] as any);
+                  ((this.state[key] as PropertyAwareArray<unknown>)[index] = newVal)
+                  const updatedValue = ((this.state[key] as PropertyAwareArray<unknown>)[index] as any)
+                  const originalValue = ((this.original[key] as PropertyAwareArray<unknown>)[index] as any);
                   (this.dirty[key] as boolean[])[index] = !isEqual(updatedValue, originalValue)
                 }
               }),
