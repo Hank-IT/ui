@@ -23,6 +23,16 @@ export class Paginator<ResourceInterface> {
     this.viewDriver = Paginator.viewDriverFactory.make<ResourceInterface>(pageNumber, pageSize)
   }
 
+  public setDataDriver(dataDriver: PaginationDataDriverContract<ResourceInterface[]>): this {
+    this.dataDriver = dataDriver
+
+    return this
+  }
+
+  public getDataDriver(): PaginationDataDriverContract<ResourceInterface[]> {
+    return this.dataDriver
+  }
+
   public init(pageNumber: number, pageSize: number): Promise<PaginationDataDto<ResourceInterface[]>> {
     this.initialized = true
 

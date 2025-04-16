@@ -1,7 +1,7 @@
 import { ResponseException } from '../../exceptions/ResponseException'
 import { FetchResponse } from './FetchResponse'
 import { RequestMethodEnum } from '../../RequestMethod.enum'
-import { type HeadersContract, HeaderValue } from '../../contracts/HeadersContract'
+import { type HeadersContract, type HeaderValue } from '../../contracts/HeadersContract'
 import { type BodyContract } from '../../contracts/BodyContract'
 import { type RequestDriverContract } from '../../contracts/RequestDriverContract'
 import { type DriverConfigContract } from '../../contracts/DriverConfigContract'

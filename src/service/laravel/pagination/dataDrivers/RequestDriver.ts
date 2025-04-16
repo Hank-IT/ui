@@ -30,4 +30,8 @@ export class RequestDriver<
         }
       )
   }
+
+  public getRequest(): TReq {
+    return this.request
+  }
 }
