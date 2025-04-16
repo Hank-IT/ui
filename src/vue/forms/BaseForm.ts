@@ -260,20 +260,20 @@ export abstract class BaseForm<
         const parts = key.split('.')
         if (parts.length > 1) {
           const topKey = parts[0]
-          // @ts-expect-error
+          // @ts-ignore
           const index = parseInt(parts[1], 10)
           const errorKey = parts.slice(2).join('.')
-          // @ts-expect-error
+          // @ts-ignore
           if (!this._errors[topKey]) {
-            // @ts-expect-error
+            // @ts-ignore
             this._errors[topKey] = []
           }
-          // @ts-expect-error
+          // @ts-ignore
           if (!this._errors[topKey][index]) {
-            // @ts-expect-error
+            // @ts-ignore
             this._errors[topKey][index] = {}
           }
-          // @ts-expect-error
+          // @ts-ignore
           this._errors[topKey][index][errorKey] = (errorsData as any)[key]
         } else {
           this._errors[key] = (errorsData as any)[key]

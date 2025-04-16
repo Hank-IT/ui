@@ -14,6 +14,7 @@ import { type HeadersContract } from './contracts/HeadersContract'
 import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
 import { type ResponseContract } from './contracts/ResponseContract'
 import { mergeDeep } from '../../helpers'
+import {v4 as uuidv4} from 'uuid';
 
 export abstract class BaseRequest<
   ResponseErrorBody,
@@ -26,6 +27,7 @@ export abstract class BaseRequest<
   ResponseClass,
   RequestParamsInterface
 > {
+  protected requestId: string = uuidv4()
   protected params: RequestParamsInterface | undefined = undefined
   protected requestBody: RequestBodyInterface | undefined = undefined
   protected loadingStateDriver: LoadingStateContract | undefined = undefined
@@ -56,24 +58,24 @@ export abstract class BaseRequest<
     this.defaultBaseUrl = url
   }
 
+  public getRequestId(): string {
+    return this.requestId
+  }
+
   public abstract method(): RequestMethodEnum
 
   public abstract url(): URL | string
 
-  public setParams(
-    params?: RequestParamsInterface
-  ): this {
+  public setParams(params?: RequestParamsInterface): this {
     this.params = params
 
     return this
   }
 
-  public withParams(
-    params: RequestParamsInterface
-  ): this {
+  public withParams(params: RequestParamsInterface): this {
     this.params = this.params === undefined
       ? params
-      : mergeDeep(this.params, params) as RequestParamsInterface
+      : mergeDeep({}, this.params, params) as RequestParamsInterface
 
     return this
   }
