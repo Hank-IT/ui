@@ -78,7 +78,7 @@ function propertyAwareDeepEqual(a: any, b: any): boolean {
  */
 export abstract class BaseForm<
   RequestBody extends object,
-  FormBody extends { [K in keyof RequestBody]: unknown }
+  FormBody extends Record<keyof RequestBody, unknown>
 > {
   public readonly state: FormBody
   private readonly dirty: Record<keyof FormBody, boolean | any[]>
