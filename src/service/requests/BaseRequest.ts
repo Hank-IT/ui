@@ -6,23 +6,25 @@ import { BaseResponse } from './responses/BaseResponse'
 import { ResponseException } from './exceptions/ResponseException'
 import { type DriverConfigContract } from './contracts/DriverConfigContract'
 import { type BodyFactoryContract } from './contracts/BodyFactoryContract'
-import { type LoadingStateContract } from './contracts/LoadingStateContract'
+import { type RequestLoaderContract } from './contracts/RequestLoaderContract'
 import { type RequestDriverContract } from './contracts/RequestDriverContract'
-import { type ViewLoaderFactoryContract } from './contracts/ViewLoaderFactoryContract'
+import { type RequestLoaderFactoryContract } from './contracts/RequestLoaderFactoryContract'
 import { type BaseRequestContract, type EventHandlerCallback } from './contracts/BaseRequestContract'
 import { type HeadersContract } from './contracts/HeadersContract'
 import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
 import { type ResponseContract } from './contracts/ResponseContract'
 import { mergeDeep } from '../../helpers'
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export abstract class BaseRequest<
+  RequestLoaderLoadingType,
   ResponseErrorBody,
   ResponseBodyInterface = undefined,
   ResponseClass extends ResponseContract<ResponseBodyInterface> = BaseResponse<ResponseBodyInterface>,
   RequestBodyInterface = undefined,
   RequestParamsInterface extends object = object,
 > implements BaseRequestContract<
+  RequestLoaderLoadingType,
   RequestBodyInterface,
   ResponseClass,
   RequestParamsInterface
@@ -30,7 +32,7 @@ export abstract class BaseRequest<
   protected requestId: string = uuidv4()
   protected params: RequestParamsInterface | undefined = undefined
   protected requestBody: RequestBodyInterface | undefined = undefined
-  protected loadingStateDriver: LoadingStateContract | undefined = undefined
+  protected requestLoader: RequestLoaderContract<RequestLoaderLoadingType> | undefined = undefined
   protected abortSignal: AbortSignal | undefined = undefined
   /* @ts-expect-error Ignore generics */
   protected events: { [key in RequestEvents]?: EventHandlerCallback[] } = {};
@@ -38,11 +40,11 @@ export abstract class BaseRequest<
   protected static defaultBaseUrl: string
 
   protected static requestDriver: RequestDriverContract
-  protected static loaderStateFactory: ViewLoaderFactoryContract
+  protected static requestLoaderFactory: RequestLoaderFactoryContract<unknown>
 
   public constructor() {
-    if (BaseRequest.loaderStateFactory !== undefined) {
-      this.loadingStateDriver = BaseRequest.loaderStateFactory.make()
+    if (BaseRequest.requestLoaderFactory !== undefined) {
+      this.requestLoader = BaseRequest.requestLoaderFactory.make() as RequestLoaderContract<RequestLoaderLoadingType>
     }
   }
 
@@ -50,12 +52,18 @@ export abstract class BaseRequest<
     this.requestDriver = driver
   }
 
-  public static setLoaderStateFactory(factory: ViewLoaderFactoryContract): void {
-    this.loaderStateFactory = factory
+  public static setRequestLoaderFactory<T>(factory: RequestLoaderFactoryContract<T>): void {
+    this.requestLoaderFactory = factory
   }
 
   public static setDefaultBaseUrl(url: string) {
     this.defaultBaseUrl = url
+  }
+
+  public setRequestLoader(loader: RequestLoaderContract<RequestLoaderLoadingType>): this {
+    this.requestLoader = loader
+
+    return this
   }
 
   public getRequestId(): string {
@@ -127,7 +135,7 @@ export abstract class BaseRequest<
   public async send(): Promise<ResponseClass> {
     this.dispatch<boolean>(RequestEvents.LOADING, true)
 
-    this.loadingStateDriver?.setLoading(true)
+    this.requestLoader?.setLoading(true)
 
     const responseSkeleton = this.getResponse()
 
@@ -160,16 +168,16 @@ export abstract class BaseRequest<
       throw error
     }).finally(() => {
       this.dispatch<boolean>(RequestEvents.LOADING, false)
-      this.loadingStateDriver?.setLoading(false)
+      this.requestLoader?.setLoading(false)
     })
   }
 
-  public isLoading(): boolean {
-    if (!this.loadingStateDriver) {
-      return false
+  public isLoading(): RequestLoaderLoadingType {
+    if (! this.requestLoader) {
+      throw new Error('Request loader is not set.')
     }
 
-    return this.loadingStateDriver?.isLoading()
+    return this.requestLoader.isLoading()
   }
 
   public abstract getResponse(): ResponseClass

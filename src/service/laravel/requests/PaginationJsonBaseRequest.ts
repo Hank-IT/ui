@@ -4,10 +4,12 @@ import { type PaginationResponseContract } from '../../pagination/contracts/Pagi
 import { PaginationResponse } from './responses/PaginationResponse'
 
 export abstract class PaginationJsonBaseRequest<
+  RequestLoaderLoadingType,
   ResponseErrorBodyInterface,
   ResourceInterface,
   RequestParamsInterface extends object
 > extends BaseRequest<
+  RequestLoaderLoadingType,
   ResponseErrorBodyInterface,
   PaginationResponseBodyContract<ResourceInterface>,
   PaginationResponseContract<PaginationResponseBodyContract<ResourceInterface>,ResourceInterface>,

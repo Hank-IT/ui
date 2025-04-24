@@ -1,7 +1,10 @@
 import { BaseRequest } from '../requests'
 
-// @ts-expect-error
-export class BulkRequestWrapper<T extends BaseRequest> {
+export class BulkRequestWrapper<
+  // @ts-expect-error
+  T extends BaseRequest,
+  RequestLoaderLoadingType
+> {
   protected response: any = null
   protected error: any = null
   protected sent: boolean = false
@@ -20,7 +23,7 @@ export class BulkRequestWrapper<T extends BaseRequest> {
     this.sent = true
   }
 
-  public isLoading(): boolean {
+  public isLoading(): RequestLoaderLoadingType {
     return this.request.isLoading()
   }
 

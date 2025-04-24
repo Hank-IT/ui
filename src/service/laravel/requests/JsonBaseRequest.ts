@@ -12,16 +12,19 @@ export interface JsonResponseInterface<ResourceInterface> {
  * and automatically sets the required headers.
  */
 export abstract class JsonBaseRequest<
+  RequestLoaderLoadingType,
   ResponseErrorBody,
   ResourceInterface,
   RequestBodyInterface = undefined,
-  RequestParamsInterface extends object = object
+  RequestParamsInterface extends object = object,
 > extends BaseRequest<
+  RequestLoaderLoadingType,
   ResponseErrorBody,
   JsonResponseInterface<ResourceInterface>,
   JsonResponse<ResourceInterface>,
   RequestBodyInterface,
-  RequestParamsInterface> {
+  RequestParamsInterface
+> {
   public getResponse(): JsonResponse<ResourceInterface> {
     return new JsonResponse<ResourceInterface>
   }

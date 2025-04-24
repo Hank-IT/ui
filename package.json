@@ -1,6 +1,6 @@
 {
   "name": "@hank-it/ui",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "type": "module",
   "exports": {
     "./service/pagination": "./src/service/pagination/index.ts",
@@ -11,7 +11,8 @@
     "./service/laravel/pagination": "./src/service/laravel/pagination/index.ts",
     "./helpers": "./src/helpers.ts",
     "./vue": "./src/vue/index.ts",
-    "./vue/forms": "./src/vue/forms/index.ts"
+    "./vue/forms": "./src/vue/forms/index.ts",
+    "./vue/requests": "./src/vue/requests/index.ts"
   },
   "scripts": {
     "dev": "vite",

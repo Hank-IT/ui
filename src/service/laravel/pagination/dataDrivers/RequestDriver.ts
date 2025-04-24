@@ -4,7 +4,7 @@ import { PaginationResponse } from '../../requests/responses/PaginationResponse'
 import { type PaginateableRequestContract } from '../../../pagination/contracts/PaginateableRequestContract'
 import { type PaginationDataDriverContract } from '../../../pagination/contracts/PaginationDataDriverContract'
 
-type ExtractRequestTypes<T> = T extends PaginationJsonBaseRequest<undefined, infer Resource, object>
+type ExtractRequestTypes<T> = T extends PaginationJsonBaseRequest<any, undefined, infer Resource, object>
   ? {
     Resource: Resource;
   }
@@ -12,7 +12,7 @@ type ExtractRequestTypes<T> = T extends PaginationJsonBaseRequest<undefined, inf
 
 export class RequestDriver<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TReq extends PaginateableRequestContract<any, any, any>> implements PaginationDataDriverContract<ExtractRequestTypes<TReq>['Resource']
+  TReq extends PaginateableRequestContract<any, any, any, any>> implements PaginationDataDriverContract<ExtractRequestTypes<TReq>['Resource']
 > {
 
   public constructor(protected request: TReq) {}

@@ -6,9 +6,10 @@ import { type HeadersContract } from './HeadersContract'
 export type EventHandlerCallback<T> = ((value: T) => void);
 
 export interface BaseRequestContract<
+  RequestLoaderLoadingType,
   RequestBodyInterface,
   ResponseClass,
-  RequestParamsInterface extends object,
+  RequestParamsInterface extends object
 > {
   method(): RequestMethodEnum
 
@@ -30,7 +31,7 @@ export interface BaseRequestContract<
 
   send(): Promise<ResponseClass>
 
-  isLoading(): boolean
+  isLoading(): RequestLoaderLoadingType | boolean
 
   getRequestBodyFactory(): BodyFactoryContract<RequestBodyInterface> | undefined
 
