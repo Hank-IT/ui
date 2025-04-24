@@ -4,8 +4,8 @@ import { type RequestLoaderContract } from '../../../service/requests/contracts/
 export class VueRequestLoader implements RequestLoaderContract<Ref<boolean>> {
   protected loading: Ref<boolean>
 
-  public constructor() {
-    this.loading = ref<boolean>(false)
+  public constructor(initialLoading: boolean = false) {
+    this.loading = ref<boolean>(initialLoading)
   }
 
   isLoading(): Ref<boolean> {
