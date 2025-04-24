@@ -5,7 +5,7 @@ export default function <FromVarType>(
   defaultValue: FromVarType | undefined = undefined,
   delay: number = 500): {
   fromVar: ComputedRef<FromVarType | undefined>,
-  isOpenFromVar: ComputedRef<boolean | FromVarType>,
+  isOpenFromVar: ComputedRef<boolean>,
   isOpenFromVarKey: Ref<number>,
 } {
   const isOpenFromVarKey = ref<number>(0)
