@@ -1,19 +1,18 @@
-import { type Ref, ref, computed } from 'vue'
+import { type Ref, ref } from 'vue'
 import { type RequestLoaderContract } from '../../../service/requests/contracts/RequestLoaderContract'
 
-
 export class VueRequestLoader implements RequestLoaderContract<Ref<boolean>> {
-  private inFlight = ref(0)
+  protected loading: Ref<boolean>
 
-  public isLoading(): Ref<boolean> {
-    return computed(() => this.inFlight.value > 0)
+  public constructor() {
+    this.loading = ref<boolean>(false)
   }
 
-  public setLoading(loading: boolean): void {
-    if (loading) {
-      this.inFlight.value++
-    } else {
-      this.inFlight.value = Math.max(0, this.inFlight.value - 1)
-    }
+  isLoading(): Ref<boolean> {
+    return this.loading
+  }
+
+  setLoading(value: boolean): void {
+    this.loading.value = value
   }
 }
