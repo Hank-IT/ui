@@ -78,7 +78,7 @@ function propertyAwareDeepEqual(a: any, b: any): boolean {
  */
 export abstract class BaseForm<
   RequestBody extends object,
-  FormBody extends Record<keyof RequestBody, unknown>
+  FormBody extends object
 > {
   public readonly state: FormBody
   private readonly dirty: Record<keyof FormBody, boolean | any[]>
@@ -86,10 +86,9 @@ export abstract class BaseForm<
   private readonly _model: { [K in keyof FormBody]: ComputedRef<FormBody[K]> }
   private _errors: any = reactive({})
   private _suggestions: any = reactive({})
-  protected appends: string[] = []
+  protected append: string[] = []
   protected ignore: string[] = []
   protected errorMap: { [serverKey: string]: string | string[] } = {}
-
   /**
    * Returns the persistence driver to use.
    * The default is a NonPersistentDriver.
@@ -392,7 +391,7 @@ export abstract class BaseForm<
       }
     }
 
-    for (const fieldName of this.appends) {
+    for (const fieldName of this.append) {
       if (Array.isArray(this.ignore) && this.ignore.includes(fieldName)) {
         console.warn(`Appended field '${fieldName}' is also in ignore list in ${this.constructor.name}. It will be skipped.`);
         continue;
