@@ -86,6 +86,9 @@ export abstract class BaseForm<
   private readonly _model: { [K in keyof FormBody]: ComputedRef<FormBody[K]> }
   private _errors: any = reactive({})
   private _suggestions: any = reactive({})
+  protected appends: string[] = []
+  protected ignore: string[] = []
+  protected errorMap: { [serverKey: string]: string | string[] } = {}
 
   /**
    * Returns the persistence driver to use.
@@ -255,31 +258,48 @@ export abstract class BaseForm<
     for (const key in this._errors) {
       delete this._errors[key]
     }
-    for (const key in errorsData) {
-      if (Object.prototype.hasOwnProperty.call(errorsData, key)) {
-        const parts = key.split('.')
-        if (parts.length > 1) {
-          const topKey = parts[0]
-          // @ts-ignore
-          const index = parseInt(parts[1], 10)
-          const errorKey = parts.slice(2).join('.')
-          // @ts-ignore
-          if (!this._errors[topKey]) {
-            // @ts-ignore
-            this._errors[topKey] = []
+
+    for (const serverKey in errorsData) {
+      if (Object.prototype.hasOwnProperty.call(errorsData, serverKey)) {
+        const errorMessage = errorsData[serverKey];
+
+        let targetKeys: string[] = [serverKey];
+
+        const mapping = this.errorMap?.[serverKey];
+        if (mapping) {
+          targetKeys = Array.isArray(mapping) ? mapping : [mapping];
+        }
+
+        for (const targetKey of targetKeys) {
+          const parts = targetKey.split('.');
+          if (parts.length > 1) {
+            const topKey = parts[0];
+            // @ts-ignore index could be NaN if part is not a number
+            const index = parseInt(parts[1], 10);
+            const errorSubKey = parts.slice(2).join('.');
+
+            // @ts-ignore Dynamic property access
+            if (!this._errors[topKey]) {
+              // @ts-ignore Dynamic property access
+              this._errors[topKey] = [];
+            }
+            // @ts-ignore Dynamic property access, index could be NaN
+            if (!this._errors[topKey][index]) {
+              // @ts-ignore Dynamic property access, index could be NaN
+              this._errors[topKey][index] = {};
+            }
+
+            // @ts-ignore Dynamic property access, index could be NaN
+            this._errors[topKey][index][errorSubKey] = errorMessage;
+
+          } else {
+            // @ts-ignore Dynamic property access
+            this._errors[targetKey] = errorMessage;
           }
-          // @ts-ignore
-          if (!this._errors[topKey][index]) {
-            // @ts-ignore
-            this._errors[topKey][index] = {}
-          }
-          // @ts-ignore
-          this._errors[topKey][index][errorKey] = (errorsData as any)[key]
-        } else {
-          this._errors[key] = (errorsData as any)[key]
         }
       }
     }
+
   }
 
   public fillState(data: Partial<FormBody>): void {
@@ -354,19 +374,38 @@ export abstract class BaseForm<
   public buildPayload(): RequestBody {
     const payload = {} as RequestBody
     for (const key in this.state) {
-      let value = this.state[key]
-      if (value instanceof PropertyAwareArray) {
-        // @ts-expect-error
-        value = (value as PropertyAwareArray).items
+      if (this.ignore.includes(key)) {
+        continue;
       }
-      const getterName = 'get' + upperFirst(camelCase(key))
-      const typedKey = key as unknown as keyof RequestBody
+
+      let value = this.state[key];
+      if (value instanceof PropertyAwareArray) {
+        // @ts-expect-error Type mismatch due to generic nature
+        value = (value as PropertyAwareArray<unknown>).items;
+      }
+      const getterName = 'get' + upperFirst(camelCase(key));
+      const typedKey = key as unknown as keyof RequestBody;
       if (typeof (this as any)[getterName] === 'function') {
-        payload[typedKey] = (this as any)[getterName](value)
+        payload[typedKey] = (this as any)[getterName](value);
       } else {
-        payload[typedKey] = this.transformValue(value, key)
+        payload[typedKey] = this.transformValue(value, key);
       }
     }
+
+    for (const fieldName of this.appends) {
+      if (Array.isArray(this.ignore) && this.ignore.includes(fieldName)) {
+        console.warn(`Appended field '${fieldName}' is also in ignore list in ${this.constructor.name}. It will be skipped.`);
+        continue;
+      }
+
+      const getterName = 'get' + upperFirst(camelCase(fieldName));
+      if (typeof (this as any)[getterName] === 'function') {
+        payload[fieldName as keyof RequestBody] = (this as any)[getterName]();
+      } else {
+        console.warn(`Getter method '${getterName}' not found for appended field '${fieldName}' in ${this.constructor.name}.`);
+      }
+    }
+
     return payload
   }
 
