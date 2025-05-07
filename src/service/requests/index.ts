@@ -17,6 +17,7 @@ import { type RequestLoaderFactoryContract } from './contracts/RequestLoaderFact
 import { type DriverConfigContract } from './contracts/DriverConfigContract'
 import { type BodyFactoryContract } from './contracts/BodyFactoryContract'
 import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
+import { type BaseRequestContract } from './contracts/BaseRequestContract'
 import { ResponseException } from './exceptions/ResponseException'
 
 export {
@@ -42,5 +43,6 @@ export type {
   RequestLoaderFactoryContract,
   DriverConfigContract,
   BodyFactoryContract,
-  ResponseHandlerContract
+  ResponseHandlerContract,
+  BaseRequestContract
 }
