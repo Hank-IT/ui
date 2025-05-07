@@ -31,9 +31,11 @@ export interface BaseRequestContract<
 
   send(): Promise<ResponseClass>
 
-  isLoading(): RequestLoaderLoadingType | boolean
+  isLoading(): RequestLoaderLoadingType
 
   getRequestBodyFactory(): BodyFactoryContract<RequestBodyInterface> | undefined
 
   getResponse(): ResponseClass
+
+  setAbortSignal(signal: AbortSignal): this
 }

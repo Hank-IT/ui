@@ -1,19 +1,24 @@
-import { BaseRequest } from '../requests'
+import { BaseRequestContract } from '../requests'
 
 export class BulkRequestWrapper<
-  // @ts-expect-error
-  T extends BaseRequest,
-  RequestLoaderLoadingType
+  RequestLoaderLoadingType,
+  RequestBodyInterface,
+  ResponseClass,
+  RequestParamsInterface extends object,
 > {
   protected response: any = null
   protected error: any = null
   protected sent: boolean = false
 
-  public constructor(protected request: T) {}
+  public constructor(protected request: BaseRequestContract<RequestLoaderLoadingType, RequestBodyInterface, ResponseClass, RequestParamsInterface>) {}
 
   public async send(signal?: AbortSignal) {
     try {
-      this.response = await this.request.setAbortSignal(signal).send()
+      if (signal !== undefined) {
+        this.request.setAbortSignal(signal)
+      }
+
+      this.response = await this.request.send()
     } catch (err) {
       console.error(err)
 
@@ -35,7 +40,7 @@ export class BulkRequestWrapper<
     return this.error
   }
 
-  public getRequest(): T {
+  public getRequest(): BaseRequestContract<RequestLoaderLoadingType, RequestBodyInterface, ResponseClass, RequestParamsInterface> {
     return this.request
   }
 
