@@ -1,4 +1,4 @@
-import { BaseRequestContract } from '../requests'
+import { type BaseRequestContract } from '../requests'
 
 export class BulkRequestWrapper<
   RequestLoaderLoadingType,
