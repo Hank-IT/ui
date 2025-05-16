@@ -1,4 +1,4 @@
-import { BaseForm } from './BaseForm'
+import { BaseForm, propertyAwareToRaw } from './BaseForm'
 import { type PersistedForm } from './types/PersistedForm'
 import { LocalStorageDriver } from './drivers/LocalStorageDriver'
 import { NonPersistentDriver } from './drivers/NonPersistentDriver'
@@ -8,6 +8,7 @@ import { PropertyAwareArray } from './PropertyAwareArray'
 
 export {
   BaseForm,
+  propertyAwareToRaw,
   PropertyAwareArray,
   NonPersistentDriver,
   SessionStorageDriver,

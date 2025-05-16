@@ -6,6 +6,40 @@ import { NonPersistentDriver } from './drivers/NonPersistentDriver'
 import { type PersistenceDriver } from './types/PersistenceDriver'
 import { PropertyAwareArray } from './PropertyAwareArray'
 
+export function propertyAwareToRaw<T>(propertyAwareObject: any): T {
+  // Prüfe, ob es sich um ein Array handelt
+  if (Array.isArray(propertyAwareObject)) {
+    return propertyAwareObject.map(item => propertyAwareToRaw(item)) as T;
+  }
+
+  // Wenn es kein Objekt ist oder null/undefined, direkt zurückgeben
+  if (!propertyAwareObject || typeof propertyAwareObject !== 'object') {
+    return propertyAwareObject as T;
+  }
+
+  const result: any = {};
+
+  for (const key in propertyAwareObject) {
+    // Überspringen von prototyp-eigenschaften oder speziellen Eigenschaften
+    if (!Object.prototype.hasOwnProperty.call(propertyAwareObject, key) || key.startsWith('_')) {
+      continue;
+    }
+
+    // Prüfen, ob die Eigenschaft ein model.value-Objekt hat
+    if (propertyAwareObject[key]?.model?.value !== undefined) {
+      result[key] = propertyAwareObject[key].model.value;
+    } else if (propertyAwareObject[key] && typeof propertyAwareObject[key] === 'object') {
+      // Rekursiv für verschachtelte Objekte oder Arrays
+      result[key] = propertyAwareToRaw(propertyAwareObject[key]);
+    } else {
+      // Fallback für den Fall, dass es sich nicht um ein property-aware Feld handelt
+      result[key] = propertyAwareObject[key];
+    }
+  }
+
+  return result as T;
+}
+
 /** Helper: shallow-merge source object into target. */
 function shallowMerge(target: any, source: any): any {
   Object.assign(target, source)
