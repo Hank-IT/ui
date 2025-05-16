@@ -4,7 +4,7 @@ import { LocalStorageDriver } from './drivers/LocalStorageDriver'
 import { NonPersistentDriver } from './drivers/NonPersistentDriver'
 import { SessionStorageDriver } from './drivers/SessionStorageDriver'
 import { type PersistenceDriver } from './types/PersistenceDriver'
-import { PropertyAwareArray } from './PropertyAwareArray'
+import { PropertyAwareArray, type PropertyAwareField, type PropertyAware } from './PropertyAwareArray'
 
 export {
   BaseForm,
@@ -18,4 +18,6 @@ export {
 export type {
   PersistedForm,
   PersistenceDriver,
+  PropertyAwareField,
+  PropertyAware
 }

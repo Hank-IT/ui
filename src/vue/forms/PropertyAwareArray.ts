@@ -1,4 +1,25 @@
 /**
+ * Repräsentiert eine reaktive Property mit model.value Zugriff
+ */
+export interface PropertyAwareField<T> {
+  model: {
+    value: T;
+  };
+  errors: any[];
+  suggestions: any[];
+  dirty: boolean;
+}
+
+/**
+ * Wandelt ein reguläres Interface in ein property-aware Interface um
+ * Jedes Feld vom Typ T wird zu einem PropertyAwareField<T>
+ */
+export type PropertyAware<T> = {
+  [K in keyof T]: T[K] extends Array<infer U>
+    ? Array<PropertyAware<U>>
+    : PropertyAwareField<T[K]>;
+};
+/**
  * Extends Array with property awareness.
  * When a form field is defined as an instance of PropertyAwareArray,
  * the BaseForm will transform each element into reactive properties with
