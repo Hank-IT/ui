@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     "./service/pagination": "./src/service/pagination/index.ts",
+    "./service/support": "./src/service/support/index.ts",
     "./service/requests": "./src/service/requests/index.ts",
     "./service/bulkRequests": "./src/service/bulkRequests/index.ts",
     "./service/requests/exceptions": "./src/service/requests/exceptions/index.ts",
