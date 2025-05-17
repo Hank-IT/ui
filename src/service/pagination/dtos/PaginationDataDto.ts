@@ -1,9 +1,8 @@
 export class PaginationDataDto<ResourceInterface> {
   public constructor(
-      protected data: ResourceInterface,
-      protected total: number,
-  ) {
-  }
+    protected data: ResourceInterface,
+    protected total: number
+  ) {}
 
   public getData(): ResourceInterface {
     return this.data

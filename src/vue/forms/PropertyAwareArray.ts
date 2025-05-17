@@ -3,11 +3,11 @@
  */
 export interface PropertyAwareField<T> {
   model: {
-    value: T;
-  };
-  errors: any[];
-  suggestions: any[];
-  dirty: boolean;
+    value: T
+  }
+  errors: any[]
+  suggestions: any[]
+  dirty: boolean
 }
 
 /**
@@ -15,10 +15,8 @@ export interface PropertyAwareField<T> {
  * Jedes Feld vom Typ T wird zu einem PropertyAwareField<T>
  */
 export type PropertyAware<T> = {
-  [K in keyof T]: T[K] extends Array<infer U>
-    ? Array<PropertyAware<U>>
-    : PropertyAwareField<T[K]>;
-};
+  [K in keyof T]: T[K] extends Array<infer U> ? Array<PropertyAware<U>> : PropertyAwareField<T[K]>
+}
 /**
  * Extends Array with property awareness.
  * When a form field is defined as an instance of PropertyAwareArray,
@@ -31,11 +29,11 @@ export class PropertyAwareArray<T = any> extends Array<T> {
    */
   public constructor(items: T[] = []) {
     // Call Array constructor with array length
-    super();
+    super()
 
     // Add items to the array
     if (items && items.length) {
-      items.forEach(item => this.push(item));
+      items.forEach((item) => this.push(item))
     }
   }
 
@@ -43,7 +41,7 @@ export class PropertyAwareArray<T = any> extends Array<T> {
    * Create a PropertyAwareArray from an existing array
    */
   public static override from<T>(arrayLike: ArrayLike<T>): PropertyAwareArray<T> {
-    return new PropertyAwareArray(Array.from(arrayLike));
+    return new PropertyAwareArray(Array.from(arrayLike))
   }
 
   /**
@@ -51,7 +49,7 @@ export class PropertyAwareArray<T = any> extends Array<T> {
    * Overridden to ensure the return type is PropertyAwareArray<U> rather than Array<U>
    */
   public override map<U>(callbackfn: (value: T, index: number, array: T[]) => U): PropertyAwareArray<U> {
-    return new PropertyAwareArray(super.map(callbackfn));
+    return new PropertyAwareArray(super.map(callbackfn))
   }
 
   /**
@@ -59,7 +57,7 @@ export class PropertyAwareArray<T = any> extends Array<T> {
    * Overridden to ensure the return type is PropertyAwareArray<T> rather than Array<T>
    */
   public override filter(predicate: (value: T, index: number, array: T[]) => boolean): PropertyAwareArray<T> {
-    return new PropertyAwareArray(super.filter(predicate));
+    return new PropertyAwareArray(super.filter(predicate))
   }
 
   /**
@@ -67,7 +65,7 @@ export class PropertyAwareArray<T = any> extends Array<T> {
    * Overridden to ensure the return type is PropertyAwareArray<T> rather than Array<T>
    */
   public override slice(start?: number, end?: number): PropertyAwareArray<T> {
-    return new PropertyAwareArray(super.slice(start, end));
+    return new PropertyAwareArray(super.slice(start, end))
   }
 
   /**
@@ -75,6 +73,6 @@ export class PropertyAwareArray<T = any> extends Array<T> {
    * Overridden to ensure the return type is PropertyAwareArray<T> rather than Array<T>
    */
   public override concat(...items: (T | ConcatArray<T>)[]): PropertyAwareArray<T> {
-    return new PropertyAwareArray(super.concat(...items));
+    return new PropertyAwareArray(super.concat(...items))
   }
 }

@@ -3,14 +3,9 @@ import { RequestEvents } from '../RequestEvents.enum'
 import { type BodyFactoryContract } from './BodyFactoryContract'
 import { type HeadersContract } from './HeadersContract'
 
-export type EventHandlerCallback<T> = ((value: T) => void);
+export type EventHandlerCallback<T> = (value: T) => void
 
-export interface BaseRequestContract<
-  RequestLoaderLoadingType,
-  RequestBodyInterface,
-  ResponseClass,
-  RequestParamsInterface extends object
-> {
+export interface BaseRequestContract<RequestLoaderLoadingType, RequestBodyInterface, ResponseClass, RequestParamsInterface extends object> {
   method(): RequestMethodEnum
 
   url(): URL | string

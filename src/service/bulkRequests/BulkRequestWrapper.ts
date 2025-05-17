@@ -1,11 +1,6 @@
 import { type BaseRequestContract } from '../requests'
 
-export class BulkRequestWrapper<
-  RequestLoaderLoadingType,
-  RequestBodyInterface,
-  ResponseClass,
-  RequestParamsInterface extends object,
-> {
+export class BulkRequestWrapper<RequestLoaderLoadingType, RequestBodyInterface, ResponseClass, RequestParamsInterface extends object> {
   protected response: any = null
   protected error: any = null
   protected sent: boolean = false

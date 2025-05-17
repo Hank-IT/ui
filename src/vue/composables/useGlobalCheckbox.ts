@@ -6,20 +6,20 @@ interface UseGlobalCheckboxOptions<T> {
   totalCount: () => number
 }
 
-export default function<T>(
+export default function <T>(
   dialog: Component,
   options: UseGlobalCheckboxOptions<T>,
   querySelector: string = 'body'
 ): {
-  selectedRows: Ref<T[]>,
-  indeterminate: ComputedRef<boolean>,
-  handleGlobalCheckboxChange: (event: Event) => void,
+  selectedRows: Ref<T[]>
+  indeterminate: ComputedRef<boolean>
+  handleGlobalCheckboxChange: (event: Event) => void
 } {
   const self = getCurrentInstance()
   const selectedRows = shallowRef<T[]>([])
 
   function mountDialog() {
-    if (! self?.appContext) {
+    if (!self?.appContext) {
       throw new Error('useGlobalCheckbox must be called inside a setup function')
     }
 
@@ -57,7 +57,7 @@ export default function<T>(
       } else {
         const mountedDialog = mountDialog()
 
-        if (mountedDialog?.exposed && await mountedDialog?.exposed['open']) {
+        if (mountedDialog?.exposed && (await mountedDialog?.exposed['open'])) {
           selectedRows.value = await options.getAll()
         } else {
           selectedRows.value = [...pageData]

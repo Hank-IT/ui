@@ -1,6 +1,6 @@
 import { isEmpty as _isEmpty } from 'lodash-es'
 
-export default function() {
+export default function () {
   function isObject(value: unknown) {
     return typeof value === 'object' && !Array.isArray(value) && value !== null
   }

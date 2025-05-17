@@ -12,7 +12,7 @@ export abstract class PaginationJsonBaseRequest<
   RequestLoaderLoadingType,
   ResponseErrorBodyInterface,
   PaginationResponseBodyContract<ResourceInterface>,
-  PaginationResponseContract<PaginationResponseBodyContract<ResourceInterface>,ResourceInterface>,
+  PaginationResponseContract<PaginationResponseBodyContract<ResourceInterface>, ResourceInterface>,
   undefined,
   RequestParamsInterface
 > {

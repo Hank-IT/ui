@@ -6,7 +6,7 @@ export class PlainTextResponse extends BaseResponse<string> {
   }
 
   protected resolveBody(): Promise<string> {
-    if (! this.response) {
+    if (!this.response) {
       throw new Error('Response is not set')
     }
 

@@ -7,7 +7,7 @@ import { NoResponseReceivedException } from './exceptions/NoResponseReceivedExce
 import { ServerErrorException } from './exceptions/ServerErrorException'
 import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
 
-export type ErrorHandlerCallback = ((response: ResponseHandlerContract) => boolean | void) | undefined;
+export type ErrorHandlerCallback = ((response: ResponseHandlerContract) => boolean | void) | undefined
 
 export class ErrorHandler<ResponseErrorBody> {
   protected body: ResponseErrorBody | undefined = undefined
@@ -18,7 +18,7 @@ export class ErrorHandler<ResponseErrorBody> {
     if (ErrorHandler.handler !== undefined) {
       // If handler returns false, we don't process the error further
       if (ErrorHandler.handler(response) === false) {
-        console.debug("Skipping further error handling due to global handler returning false.")
+        console.debug('Skipping further error handling due to global handler returning false.')
         return
       }
     }

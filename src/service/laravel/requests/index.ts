@@ -4,13 +4,6 @@ import { JsonBaseRequest } from './JsonBaseRequest'
 import { PaginationJsonBaseRequest } from './PaginationJsonBaseRequest'
 import { type JsonResponseInterface } from './JsonBaseRequest'
 
-export {
-  JsonResponse,
-  PaginationResponse,
-  JsonBaseRequest,
-  PaginationJsonBaseRequest,
-}
+export { JsonResponse, PaginationResponse, JsonBaseRequest, PaginationJsonBaseRequest }
 
-export type {
-  JsonResponseInterface
-}
+export type { JsonResponseInterface }

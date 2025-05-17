@@ -2,11 +2,6 @@ import { type PaginationParamsContract } from './contracts/PaginationParamsContr
 import { type PaginationResponseBodyContract } from './contracts/PaginationResponseBodyContract'
 import { RequestDriver } from '../pagination/dataDrivers/RequestDriver'
 
-export type {
-  PaginationParamsContract,
-  PaginationResponseBodyContract
-}
+export type { PaginationParamsContract, PaginationResponseBodyContract }
 
-export {
-  RequestDriver
-}
+export { RequestDriver }

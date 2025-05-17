@@ -16,10 +16,7 @@ export class VueRequestBatchLoader implements RequestLoaderContract<Ref<boolean>
   }
 
   public isLoading(): Ref<boolean> {
-    return computed(() =>
-      this.inFlight.value > 0 ||
-      (this.expected > 0 && this.completed.value < this.expected)
-    )
+    return computed(() => this.inFlight.value > 0 || (this.expected > 0 && this.completed.value < this.expected))
   }
 
   public setLoading(loading: boolean): void {

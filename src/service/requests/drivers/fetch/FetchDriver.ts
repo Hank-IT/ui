@@ -9,20 +9,19 @@ import { type ResponseHandlerContract } from '../contracts/ResponseHandlerContra
 
 enum FetchDriverCredentialConfigEnum {
   OMIT = 'omit',
-  INCLUDE = 'include',
+  INCLUDE = 'include'
 }
 
 interface FetchDriverConfig {
-  method: RequestMethodEnum,
-  headers: HeadersContract,
-  credentials?: FetchDriverCredentialConfigEnum | undefined,
-  signal?: AbortSignal | undefined,
-  body?: string | FormData | Blob | ArrayBuffer | ArrayBufferView | URLSearchParams | undefined,
+  method: RequestMethodEnum
+  headers: HeadersContract
+  credentials?: FetchDriverCredentialConfigEnum | undefined
+  signal?: AbortSignal | undefined
+  body?: string | FormData | Blob | ArrayBuffer | ArrayBufferView | URLSearchParams | undefined
 }
 
 export class FetchDriver implements RequestDriverContract {
-  public constructor(protected config?: DriverConfigContract) {
-  }
+  public constructor(protected config?: DriverConfigContract) {}
 
   public async send(
     url: URL | string,
@@ -36,7 +35,7 @@ export class FetchDriver implements RequestDriverContract {
       ...this.config,
 
       // Request specific overrides
-      ...requestConfig ?? {}
+      ...(requestConfig ?? {})
     }
 
     const mergedHeaders: HeadersContract = {
@@ -50,11 +49,9 @@ export class FetchDriver implements RequestDriverContract {
       ...body?.getHeaders()
     }
 
-    const resolvedHeaders = this.resolveHeaders(mergedHeaders);
+    const resolvedHeaders = this.resolveHeaders(mergedHeaders)
 
-    const fetchConfig = this.buildRequestConfig(
-      mergedConfig, method, resolvedHeaders, body
-    )
+    const fetchConfig = this.buildRequestConfig(mergedConfig, method, resolvedHeaders, body)
 
     const response = await fetch(url, fetchConfig as RequestInit)
 
@@ -75,7 +72,7 @@ export class FetchDriver implements RequestDriverContract {
   ): FetchDriverConfig {
     return {
       method: method,
-      headers: headers ,
+      headers: headers,
       credentials: this.getCorsWithCredentials(config.corsWithCredentials),
       signal: config.abortSignal ?? undefined,
       body: [RequestMethodEnum.GET, RequestMethodEnum.HEAD].includes(method) ? undefined : body?.getContent()
@@ -94,9 +91,7 @@ export class FetchDriver implements RequestDriverContract {
 
     // Fallback to default config
     if (this.config) {
-      return this.config.corsWithCredentials
-        ? FetchDriverCredentialConfigEnum.INCLUDE
-        : FetchDriverCredentialConfigEnum.OMIT
+      return this.config.corsWithCredentials ? FetchDriverCredentialConfigEnum.INCLUDE : FetchDriverCredentialConfigEnum.OMIT
     }
 
     // Fallback to safe option if no default set

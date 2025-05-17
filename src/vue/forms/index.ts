@@ -6,18 +6,6 @@ import { SessionStorageDriver } from './drivers/SessionStorageDriver'
 import { type PersistenceDriver } from './types/PersistenceDriver'
 import { PropertyAwareArray, type PropertyAwareField, type PropertyAware } from './PropertyAwareArray'
 
-export {
-  BaseForm,
-  propertyAwareToRaw,
-  PropertyAwareArray,
-  NonPersistentDriver,
-  SessionStorageDriver,
-  LocalStorageDriver,
-}
+export { BaseForm, propertyAwareToRaw, PropertyAwareArray, NonPersistentDriver, SessionStorageDriver, LocalStorageDriver }
 
-export type {
-  PersistedForm,
-  PersistenceDriver,
-  PropertyAwareField,
-  PropertyAware
-}
+export type { PersistedForm, PersistenceDriver, PropertyAwareField, PropertyAware }

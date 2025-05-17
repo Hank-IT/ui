@@ -2,7 +2,7 @@ import { computed, ref, type Ref, type ComputedRef } from 'vue'
 import { type ViewDriverContract } from '../contracts/ViewDriverContract'
 
 export class VuePaginationDriver<ResourceInterface> implements ViewDriverContract<ResourceInterface[]> {
-  protected dataRef: Ref<ResourceInterface[]>;
+  protected dataRef: Ref<ResourceInterface[]>
   protected currentPageRef: Ref<number>
   protected pageSizeRef: Ref<number>
   protected totalRef: Ref<number>
@@ -10,7 +10,7 @@ export class VuePaginationDriver<ResourceInterface> implements ViewDriverContrac
   protected pagesComputed: ComputedRef<number[]>
 
   public constructor(pageNumber: number, pageSize: number) {
-    this.dataRef = ref([]) as Ref<ResourceInterface[]>;
+    this.dataRef = ref([]) as Ref<ResourceInterface[]>
     this.currentPageRef = ref<number>(pageNumber)
     this.pageSizeRef = ref<number>(pageSize)
     this.totalRef = ref<number>(0)

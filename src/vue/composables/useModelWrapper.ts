@@ -6,12 +6,8 @@ export interface ModelValueOptions<T> extends ParentModelValueOptions {
   callback?: (value: T) => void
 }
 
-export default function<T, EmitType>(props: ModelValueProps, emit: EmitType, options: ModelValueOptions<T> = {}) {
-  const {
-    name = 'modelValue',
-    callback = () => {
-    }
-  } = options
+export default function <T, EmitType>(props: ModelValueProps, emit: EmitType, options: ModelValueOptions<T> = {}) {
+  const { name = 'modelValue', callback = () => {} } = options
 
   return computed({
     get(): T {

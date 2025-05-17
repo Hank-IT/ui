@@ -32,7 +32,7 @@ export {
   RequestMethodEnum,
   ResponseException,
   JsonBodyFactory,
-  FormDataFactory,
+  FormDataFactory
 }
 
 export type {

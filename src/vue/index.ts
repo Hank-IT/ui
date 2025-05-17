@@ -9,17 +9,6 @@ import useConfirmDialog from './composables/useConfirmDialog'
 import { type ConfirmDialogSeverity } from './composables/useConfirmDialog'
 import { type ConfirmDialogOptions } from './composables/useConfirmDialog'
 
-export {
-  useIsOpen,
-  useModelWrapper,
-  useOnOpen,
-  useIsOpenFromVar,
-  useGlobalCheckbox,
-  useIsEmpty,
-  useConfirmDialog,
-}
+export { useIsOpen, useModelWrapper, useOnOpen, useIsOpenFromVar, useGlobalCheckbox, useIsEmpty, useConfirmDialog }
 
-export type {
-  ConfirmDialogSeverity,
-  ConfirmDialogOptions,
-}
+export type { ConfirmDialogSeverity, ConfirmDialogOptions }

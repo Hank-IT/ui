@@ -19,17 +19,14 @@ export interface ConfirmDialogOptions {
  * The provided component needs to expose an "open" method, which
  * should return a promise resolving into true or false.
  */
-export default function(
-  confirmDialogComponent: Component,
-  querySelector: string = 'body'
-) {
+export default function (confirmDialogComponent: Component, querySelector: string = 'body') {
   const self = getCurrentInstance()
 
   /**
    * https://stackoverflow.com/a/78448128
    */
   function mountConfirmDialog(options: ConfirmDialogOptions) {
-    if (! self?.appContext) {
+    if (!self?.appContext) {
       throw new Error('ConfirmationDialog: useConfirmDialog must be called inside a setup function')
     }
 

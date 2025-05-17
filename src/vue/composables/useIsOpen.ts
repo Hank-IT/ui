@@ -1,11 +1,11 @@
 import { ref, computed, type Ref, type WritableComputedRef } from 'vue'
 
-export default function(
+export default function (
   callback: (value: boolean) => void = () => {},
   delay: number = 500
 ): {
-  isOpenKey: Ref<number>,
-  isOpen: WritableComputedRef<boolean>,
+  isOpenKey: Ref<number>
+  isOpen: WritableComputedRef<boolean>
 } {
   const internalIsOpen = ref<boolean>(false)
 

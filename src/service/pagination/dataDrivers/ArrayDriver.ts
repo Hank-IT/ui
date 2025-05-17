@@ -8,8 +8,8 @@ export class ArrayDriver<ResourceInterface> implements PaginationDataDriverContr
       resolve(
         new PaginationDataDto<ResourceInterface[]>(
           this.data.slice(this.calculatedStart(page, size), this.calculatedEnd(page, size)),
-          this.data.length,
-        ),
+          this.data.length
+        )
       )
     })
   }

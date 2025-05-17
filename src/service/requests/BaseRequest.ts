@@ -14,7 +14,7 @@ import { type HeadersContract } from './contracts/HeadersContract'
 import { type ResponseHandlerContract } from './drivers/contracts/ResponseHandlerContract'
 import { type ResponseContract } from './contracts/ResponseContract'
 import { mergeDeep } from '../../helpers'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 
 export abstract class BaseRequest<
   RequestLoaderLoadingType,
@@ -22,20 +22,16 @@ export abstract class BaseRequest<
   ResponseBodyInterface = undefined,
   ResponseClass extends ResponseContract<ResponseBodyInterface> = BaseResponse<ResponseBodyInterface>,
   RequestBodyInterface = undefined,
-  RequestParamsInterface extends object = object,
-> implements BaseRequestContract<
-  RequestLoaderLoadingType,
-  RequestBodyInterface,
-  ResponseClass,
-  RequestParamsInterface
-> {
+  RequestParamsInterface extends object = object
+> implements BaseRequestContract<RequestLoaderLoadingType, RequestBodyInterface, ResponseClass, RequestParamsInterface>
+{
   protected requestId: string = uuidv4()
   protected params: RequestParamsInterface | undefined = undefined
   protected requestBody: RequestBodyInterface | undefined = undefined
   protected requestLoader: RequestLoaderContract<RequestLoaderLoadingType> | undefined = undefined
   protected abortSignal: AbortSignal | undefined = undefined
   /* @ts-expect-error Ignore generics */
-  protected events: { [key in RequestEvents]?: EventHandlerCallback[] } = {};
+  protected events: { [key in RequestEvents]?: EventHandlerCallback[] } = {}
 
   protected static defaultBaseUrl: string
 
@@ -81,9 +77,7 @@ export abstract class BaseRequest<
   }
 
   public withParams(params: RequestParamsInterface): this {
-    this.params = this.params === undefined
-      ? params
-      : mergeDeep({}, this.params, params) as RequestParamsInterface
+    this.params = this.params === undefined ? params : (mergeDeep({}, this.params, params) as RequestParamsInterface)
 
     return this
   }
@@ -107,9 +101,7 @@ export abstract class BaseRequest<
   }
 
   public buildUrl(): URL {
-    const url = this.params !== undefined && Object.keys(this.params).length === 0
-      ? this.url()
-      : this.url() + '?' + qs.stringify(this.params)
+    const url = this.params !== undefined && Object.keys(this.params).length === 0 ? this.url() : this.url() + '?' + qs.stringify(this.params)
 
     return new URL(url, this.baseUrl() ?? BaseRequest.defaultBaseUrl)
   }
@@ -139,41 +131,43 @@ export abstract class BaseRequest<
 
     const responseSkeleton = this.getResponse()
 
-    const requestBody = this.requestBody === undefined
-      ? undefined
-      : this.getRequestBodyFactory()?.make(this.requestBody)
+    const requestBody = this.requestBody === undefined ? undefined : this.getRequestBodyFactory()?.make(this.requestBody)
 
-    return BaseRequest.requestDriver.send(
-      this.buildUrl(),
-      this.method(),
-      {
-        'Accept': responseSkeleton.getAcceptHeader(),
-        ...this.requestHeaders()
-      },
-      requestBody,
-      this.getConfig()
-    ).then(async (responseHandler: ResponseHandlerContract) => {
-      await responseSkeleton.setResponse(responseHandler)
+    return BaseRequest.requestDriver
+      .send(
+        this.buildUrl(),
+        this.method(),
+        {
+          Accept: responseSkeleton.getAcceptHeader(),
+          ...this.requestHeaders()
+        },
+        requestBody,
+        this.getConfig()
+      )
+      .then(async (responseHandler: ResponseHandlerContract) => {
+        await responseSkeleton.setResponse(responseHandler)
 
-      return responseSkeleton
-    }).catch(async error => {
-      if (error instanceof ResponseException) {
-        const handler = new ErrorHandler<ResponseErrorBody>(error.getResponse())
+        return responseSkeleton
+      })
+      .catch(async (error) => {
+        if (error instanceof ResponseException) {
+          const handler = new ErrorHandler<ResponseErrorBody>(error.getResponse())
 
-        await handler.handle()
-      }
+          await handler.handle()
+        }
 
-      console.error('HankIT-UI: Unknown error received.', error)
+        console.error('HankIT-UI: Unknown error received.', error)
 
-      throw error
-    }).finally(() => {
-      this.dispatch<boolean>(RequestEvents.LOADING, false)
-      this.requestLoader?.setLoading(false)
-    })
+        throw error
+      })
+      .finally(() => {
+        this.dispatch<boolean>(RequestEvents.LOADING, false)
+        this.requestLoader?.setLoading(false)
+      })
   }
 
   public isLoading(): RequestLoaderLoadingType {
-    if (! this.requestLoader) {
+    if (!this.requestLoader) {
       throw new Error('Request loader is not set.')
     }
 
@@ -198,7 +192,7 @@ export abstract class BaseRequest<
 
   protected getConfig(): DriverConfigContract | undefined {
     return {
-      abortSignal: this.abortSignal,
+      abortSignal: this.abortSignal
     }
   }
 }

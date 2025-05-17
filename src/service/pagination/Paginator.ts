@@ -124,12 +124,11 @@ export class Paginator<ResourceInterface> {
   }
 
   protected loadData(pageNumber: number, pageSize: number, options?: PaginatorLoadDataOptions): Promise<PaginationDataDto<ResourceInterface[]>> {
-    return this.dataDriver.get(pageNumber, pageSize)
-      .then((value: PaginationDataDto<ResourceInterface[]>) => {
-        this.passDataToViewDriver(value, options)
+    return this.dataDriver.get(pageNumber, pageSize).then((value: PaginationDataDto<ResourceInterface[]>) => {
+      this.passDataToViewDriver(value, options)
 
-        return value
-      })
+      return value
+    })
   }
 
   protected passDataToViewDriver(dto: PaginationDataDto<ResourceInterface[]>, options?: PaginatorLoadDataOptions): void {

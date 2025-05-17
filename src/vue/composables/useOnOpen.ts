@@ -2,7 +2,7 @@ import { nextTick, type Ref, watch } from 'vue'
 
 type Callback = () => void
 
-export default function(ref: Ref<unknown>) {
+export default function (ref: Ref<unknown>) {
   const openCallbacks: Callback[] = []
   const closeCallbacks: Callback[] = []
 
@@ -11,9 +11,9 @@ export default function(ref: Ref<unknown>) {
     (newValue, oldValue) => {
       nextTick(() => {
         if (newValue && !oldValue) {
-          openCallbacks.forEach(callback => callback())
+          openCallbacks.forEach((callback) => callback())
         } else if (!newValue && oldValue) {
-          closeCallbacks.forEach(callback => callback())
+          closeCallbacks.forEach((callback) => callback())
         }
       })
     }

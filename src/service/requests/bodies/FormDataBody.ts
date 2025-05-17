@@ -17,16 +17,10 @@ export class FormDataBody<RequestBody> implements BodyContract {
     return {}
   }
 
-  protected toFormData(
-    data: RequestBody,
-    form: FormData = new FormData,
-    namespace: string | null = null
-  ): FormData {
+  protected toFormData(data: RequestBody, form: FormData = new FormData(), namespace: string | null = null): FormData {
     for (const property in data) {
       if (Object.prototype.hasOwnProperty.call(data, property)) {
-        const formKey = namespace
-          ? namespace + '[' + property + ']'
-          : property
+        const formKey = namespace ? namespace + '[' + property + ']' : property
 
         // if the property is an object, but not a File, use recursivity.
         if (data[property] instanceof Date) {

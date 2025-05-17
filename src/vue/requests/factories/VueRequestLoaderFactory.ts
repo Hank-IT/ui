@@ -3,7 +3,7 @@ import { type RequestLoaderContract } from '../../../service/requests/contracts/
 import { type Ref } from 'vue'
 
 export class VueRequestLoaderFactory {
-    public make(): RequestLoaderContract<Ref<boolean>> {
-        return new VueRequestLoader()
-    }
+  public make(): RequestLoaderContract<Ref<boolean>> {
+    return new VueRequestLoader()
+  }
 }

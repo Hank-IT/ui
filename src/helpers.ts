@@ -70,7 +70,7 @@ export const getDisplayablePages = (totalPages: number, pageNumber: number, disp
     offset = pageNumber - middlePage
   }
 
-  return [...Array(displayPages).keys()].map(i => i + 1 + offset)
+  return [...Array(displayPages).keys()].map((i) => i + 1 + offset)
 }
 
 export const isAtBottom = (scrollHeight: number, scrollTop: number, clientHeight: number): boolean => {

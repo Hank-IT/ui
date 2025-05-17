@@ -16,7 +16,7 @@ export abstract class JsonBaseRequest<
   ResponseErrorBody,
   ResourceInterface,
   RequestBodyInterface = undefined,
-  RequestParamsInterface extends object = object,
+  RequestParamsInterface extends object = object
 > extends BaseRequest<
   RequestLoaderLoadingType,
   ResponseErrorBody,
@@ -26,10 +26,10 @@ export abstract class JsonBaseRequest<
   RequestParamsInterface
 > {
   public getResponse(): JsonResponse<ResourceInterface> {
-    return new JsonResponse<ResourceInterface>
+    return new JsonResponse<ResourceInterface>()
   }
 
   public override getRequestBodyFactory(): BodyFactoryContract<RequestBodyInterface | undefined> {
-    return new JsonBodyFactory<RequestBodyInterface>
+    return new JsonBodyFactory<RequestBodyInterface>()
   }
 }

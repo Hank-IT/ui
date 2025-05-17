@@ -3,7 +3,7 @@ import { type ViewDriverFactoryContract } from '../contracts/ViewDriverFactoryCo
 import { type ViewDriverContract } from '../contracts/ViewDriverContract'
 
 export class VuePaginationDriverFactory implements ViewDriverFactoryContract {
-    public make<ResourceInterface>(pageNumber: number, pageSize: number): ViewDriverContract<ResourceInterface[]> {
-        return new VuePaginationDriver<ResourceInterface>(pageNumber, pageSize)
-    }
+  public make<ResourceInterface>(pageNumber: number, pageSize: number): ViewDriverContract<ResourceInterface[]> {
+    return new VuePaginationDriver<ResourceInterface>(pageNumber, pageSize)
+  }
 }

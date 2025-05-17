@@ -1,9 +1,7 @@
 import { BaseResponse } from './BaseResponse'
 
 export class BlobResponse extends BaseResponse<Blob> {
-  public constructor(
-    protected mimeType: string = 'application/octet-stream'
-  ) {
+  public constructor(protected mimeType: string = 'application/octet-stream') {
     super()
   }
 

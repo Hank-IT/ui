@@ -2,7 +2,7 @@ import { type ResponseHandlerContract } from '../drivers/contracts/ResponseHandl
 import { type HeadersContract } from '../contracts/HeadersContract'
 import { type ResponseContract } from '../contracts/ResponseContract'
 
-export abstract class BaseResponse<ResponseInterface> implements ResponseContract<ResponseInterface>{
+export abstract class BaseResponse<ResponseInterface> implements ResponseContract<ResponseInterface> {
   private body?: ResponseInterface
 
   protected response?: ResponseHandlerContract

@@ -1,3 +1,3 @@
 export enum RequestEvents {
-    LOADING = 'loading'
+  LOADING = 'loading'
 }

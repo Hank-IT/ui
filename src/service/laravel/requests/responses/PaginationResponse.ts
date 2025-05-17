@@ -4,9 +4,7 @@ import { type PaginationResponseContract } from '../../../pagination/contracts/P
 
 export class PaginationResponse<ResourceInterface>
   extends JsonResponse<PaginationResponseBodyContract<ResourceInterface>>
-  implements PaginationResponseContract<
-    PaginationResponseBodyContract<ResourceInterface>, ResourceInterface
-  >
+  implements PaginationResponseContract<PaginationResponseBodyContract<ResourceInterface>, ResourceInterface>
 {
   public getTotal(): number {
     return this.getBody().meta.total
