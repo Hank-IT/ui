@@ -603,4 +603,70 @@ export abstract class BaseForm<RequestBody extends object, FormBody extends obje
     }
     return Object.values(this.dirty).some((v) => checkDirty(v))
   }
+
+  /**
+   * Updates both the state and original value for a given property,
+   * keeping the field in a clean (not dirty) state.
+   * Supports all field types including PropertyAwareArray.
+   * 
+   * @param key The property key to update
+   * @param value The new value to set
+   */
+  public syncValue<K extends keyof FormBody>(key: K, value: FormBody[K]): void {
+    const driver = this.getPersistenceDriver(this.options?.persistSuffix)
+    const currentVal = this.state[key]
+    
+    // Handle PropertyAwareArray
+    if (currentVal instanceof PropertyAwareArray) {
+      const arr = this.state[key] as PropertyAwareArray
+      const originalArr = this.original[key] as PropertyAwareArray
+      
+      // Clear arrays
+      arr.length = 0
+      originalArr.length = 0
+      
+      // Fill both arrays with the new value
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          arr.push(cloneDeep(item))
+          originalArr.push(cloneDeep(item))
+        })
+      } else if (value instanceof PropertyAwareArray) {
+        ;[...value].forEach(item => {
+          arr.push(cloneDeep(item))
+          originalArr.push(cloneDeep(item))
+        })
+      }
+      
+      // Reset dirty state for this array
+      this.dirty[key] = ([...arr] as any[]).map(() => false)
+    } 
+    // Handle regular arrays
+    else if (Array.isArray(currentVal)) {
+      this.state[key] = cloneDeep(value)
+      this.original[key] = cloneDeep(value)
+      this.dirty[key] = false
+    } 
+    // Handle objects
+    else if (typeof currentVal === 'object' && currentVal !== null) {
+      this.state[key] = cloneDeep(value)
+      this.original[key] = cloneDeep(value)
+      this.dirty[key] = false
+    } 
+    // Handle primitive values
+    else {
+      this.state[key] = value
+      this.original[key] = value
+      this.dirty[key] = false
+    }
+    
+    // Update persistence if enabled
+    if (this.options?.persist !== false) {
+      driver.set(this.constructor.name, {
+        state: toRaw(this.state),
+        original: toRaw(this.original),
+        dirty: toRaw(this.dirty)
+      } as PersistedForm<FormBody>)
+    }
+  }
 }
