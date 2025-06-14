@@ -1,4 +1,4 @@
-import { type PersistenceDriver } from '../types/PersistenceDriver'
+import { PersistenceDriver } from './types/PersistenceDriver'
 
 /** Default driver: does not persist any data. */
 export class NonPersistentDriver implements PersistenceDriver {
