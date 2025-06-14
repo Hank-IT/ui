@@ -7,6 +7,7 @@
     "./service/support": "./src/service/support/index.ts",
     "./service/requests": "./src/service/requests/index.ts",
     "./service/bulkRequests": "./src/service/bulkRequests/index.ts",
+    "./service/persistenceDrivers": "./src/service/persistenceDrivers/index.ts",
     "./service/requests/exceptions": "./src/service/requests/exceptions/index.ts",
     "./service/laravel/requests": "./src/service/laravel/requests/index.ts",
     "./service/laravel/pagination": "./src/service/laravel/pagination/index.ts",
