@@ -2,8 +2,8 @@ import { reactive, computed, toRaw, type ComputedRef, watch } from 'vue'
 import { camelCase, upperFirst, cloneDeep, isEqual } from 'lodash-es'
 import isEqualWith from 'lodash-es/isEqualWith'
 import { type PersistedForm } from './types/PersistedForm'
-import { NonPersistentDriver } from './drivers/NonPersistentDriver'
-import { type PersistenceDriver } from './types/PersistenceDriver'
+import { NonPersistentDriver } from '../../service/persistenceDrivers/NonPersistentDriver'
+import { type PersistenceDriver } from '../../service/persistenceDrivers/types/PersistenceDriver'
 import { PropertyAwareArray } from './PropertyAwareArray'
 
 export function propertyAwareToRaw<T>(propertyAwareObject: any): T {
@@ -152,7 +152,7 @@ export abstract class BaseForm<RequestBody extends object, FormBody extends obje
     const driver = this.getPersistenceDriver(options?.persistSuffix)
 
     if (persist) {
-      const persisted = driver.get<FormBody>(this.constructor.name)
+      const persisted = driver.get<PersistedForm<FormBody>>(this.constructor.name)
       if (persisted && propertyAwareDeepEqual(defaults, persisted.original)) {
         initialData = persisted.state
         this.original = cloneDeep(persisted.original)
@@ -413,7 +413,7 @@ export abstract class BaseForm<RequestBody extends object, FormBody extends obje
         continue
       }
 
-      let value = this.state[key]
+      const value = this.state[key]
 
       const getterName = 'get' + upperFirst(camelCase(key))
       const typedKey = key as unknown as keyof RequestBody
