@@ -4,6 +4,10 @@ import { type ViewDriverFactoryContract } from './contracts/ViewDriverFactoryCon
 import { type PaginatorLoadDataOptions } from './contracts/PaginatorLoadDataOptions'
 import { type PaginationDataDriverContract } from './contracts/PaginationDataDriverContract'
 
+export interface PaginatorOptions {
+  viewDriverFactory?: ViewDriverFactoryContract
+}
+
 export class Paginator<ResourceInterface> {
   protected initialized: boolean = false
 
@@ -18,9 +22,12 @@ export class Paginator<ResourceInterface> {
   public constructor(
     protected dataDriver: PaginationDataDriverContract<ResourceInterface[]>,
     pageNumber: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
+    options?: PaginatorOptions
   ) {
-    this.viewDriver = Paginator.viewDriverFactory.make<ResourceInterface>(pageNumber, pageSize)
+    this.viewDriver = options?.viewDriverFactory
+      ? options.viewDriverFactory.make<ResourceInterface>(pageNumber, pageSize)
+      : Paginator.viewDriverFactory.make<ResourceInterface>(pageNumber, pageSize)
   }
 
   public setDataDriver(dataDriver: PaginationDataDriverContract<ResourceInterface[]>): this {
