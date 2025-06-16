@@ -1,6 +1,6 @@
 {
   "name": "@hank-it/ui",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "type": "module",
   "exports": {
     "./service/pagination": "./src/service/pagination/index.ts",
