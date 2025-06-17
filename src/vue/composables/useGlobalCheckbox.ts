@@ -13,6 +13,7 @@ export default function <T>(
 ): {
   selectedRows: Ref<T[]>
   indeterminate: ComputedRef<boolean>
+  checked: ComputedRef<boolean>
   handleGlobalCheckboxChange: (event: Event) => void
 } {
   const self = getCurrentInstance()
@@ -38,9 +39,13 @@ export default function <T>(
     unmountConfirmDialog()
   })
 
+  const checked = computed(() => {
+    const totalCount: number = options.totalCount()
+    return selectedRows.value.length > 0 && selectedRows.value.length === totalCount
+  })
+
   const indeterminate = computed(() => {
     const totalCount: number = options.totalCount()
-
     return selectedRows.value.length > 0 && selectedRows.value.length < totalCount
   })
 
@@ -71,6 +76,7 @@ export default function <T>(
   return {
     selectedRows,
     indeterminate,
+    checked,
     handleGlobalCheckboxChange
   }
 }
