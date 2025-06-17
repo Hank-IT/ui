@@ -24,7 +24,10 @@ export default function <T>(
       throw new Error('useGlobalCheckbox must be called inside a setup function')
     }
 
-    const vNode = h(dialog)
+    const vNode = h(dialog, {
+      indeterminate: indeterminate.value,
+      checked: checked.value,
+    })
     vNode.key = Symbol()
     vNode.appContext = self.appContext
     render(vNode, document.querySelector(querySelector) as Element)
@@ -39,37 +42,72 @@ export default function <T>(
     unmountConfirmDialog()
   })
 
-  const checked = computed(() => {
-    const totalCount: number = options.totalCount()
-    return selectedRows.value.length > 0 && selectedRows.value.length === totalCount
-  })
-
   const indeterminate = computed(() => {
     const totalCount: number = options.totalCount()
     return selectedRows.value.length > 0 && selectedRows.value.length < totalCount
   })
 
+  const checked = computed({
+    get: () => {
+      const totalCount: number = options.totalCount()
+      return selectedRows.value.length > 0 && selectedRows.value.length === totalCount
+    },
+    set: (value: boolean) => {
+      if (!value) {
+        selectedRows.value = []
+      }
+    }
+  })
+
   async function handleGlobalCheckboxChange(event: Event) {
+    event.preventDefault()
+
     if (!(event.target instanceof HTMLInputElement)) {
       return
     }
 
-    if (event.target?.checked) {
-      const pageData: T[] = options.getPage()
+    const pageData: T[] = options.getPage()
+    const mountedDialog = mountDialog()
 
-      if (pageData.length === options.totalCount()) {
+    if (!mountedDialog?.exposed) return
+
+    // Case 1: Nothing is selected (unchecked state)
+    if (!checked.value && !indeterminate.value) {
+      // When clicking the empty checkbox, ask if user wants current page or all entries
+      if (await mountedDialog.exposed['open']) {
+        // User clicked "All Elements" button
+        selectedRows.value = await options.getAll()
+      } else {
+        // User clicked "Current Page" button
+        selectedRows.value = [...pageData]
+      }
+      return
+    }
+
+    // Case 2: Indeterminate state (some items selected, not all)
+    if (indeterminate.value) {
+      // When clicking the indeterminate checkbox, ask if user wants all entries or unselect all
+      if (await mountedDialog.exposed['open']) {
+        // User clicked "All Elements" button
+        selectedRows.value = await options.getAll()
+      } else {
+        // User clicked "Discard" button
+        selectedRows.value = []
+      }
+      return
+    }
+
+    // Case 3: Checked state (all items selected)
+    if (checked.value) {
+      // When clicking the checked checkbox, ask if user wants current page or unselect all
+      if (await mountedDialog.exposed['open']) {
+        // User clicked "Current Page" button
         selectedRows.value = [...pageData]
       } else {
-        const mountedDialog = mountDialog()
-
-        if (mountedDialog?.exposed && (await mountedDialog?.exposed['open'])) {
-          selectedRows.value = await options.getAll()
-        } else {
-          selectedRows.value = [...pageData]
-        }
+        // User clicked "Discard" button
+        selectedRows.value = []
       }
-    } else {
-      selectedRows.value = []
+      return
     }
   }
 
