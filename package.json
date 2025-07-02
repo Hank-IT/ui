@@ -6,7 +6,6 @@
     "./service/pagination": "./src/service/pagination/index.ts",
     "./service/support": "./src/service/support/index.ts",
     "./service/requests": "./src/service/requests/index.ts",
-    "./service/state": "./src/service/state/index.ts",
     "./service/bulkRequests": "./src/service/bulkRequests/index.ts",
     "./service/persistenceDrivers": "./src/service/persistenceDrivers/index.ts",
     "./service/requests/exceptions": "./src/service/requests/exceptions/index.ts",
@@ -15,7 +14,8 @@
     "./helpers": "./src/helpers.ts",
     "./vue": "./src/vue/index.ts",
     "./vue/forms": "./src/vue/forms/index.ts",
-    "./vue/requests": "./src/vue/requests/index.ts"
+    "./vue/requests": "./src/vue/requests/index.ts",
+    "./vue/state": "./src/vue/state/index.ts"
   },
   "scripts": {
     "dev": "vite",
