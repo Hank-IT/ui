@@ -1,7 +1,7 @@
-import { computed, ref, type Ref } from 'vue'
 import { debounce } from 'lodash-es'
 import { type PersistenceDriver } from '../../service/persistenceDrivers'
 import { NonPersistentDriver } from '../../service/persistenceDrivers'
+import { computed, ref, type Ref, watch, reactive } from 'vue'
 
 export interface StateOptions {
   persist?: boolean
@@ -50,6 +50,7 @@ export abstract class State<T extends object> {
   private readonly _persistKey: string
   private _driver: PersistenceDriver
   private _stateProxy: T | null = null
+  private _watchStopFunctions: Map<string, () => void> = new Map()
 
   protected constructor(initial: T, options?: StateOptions) {
     this._initial = initial
@@ -80,21 +81,22 @@ export abstract class State<T extends object> {
     const keys = Object.keys(base) as Array<keyof T>
 
     for (const k of keys) {
-      const _ref = ref((base as T)[k]) as Ref<T[typeof k]>
-
-      // Special handling for objects - wrap them in a reactive proxy
-      if (typeof _ref.value === 'object' && _ref.value !== null && !Array.isArray(_ref.value)) {
-        _ref.value = this.createDeepWatchedObject(k.toString(), _ref.value) as T[typeof k]
+      // Use Vue's reactive for objects and arrays
+      let value = (base as T)[k]
+      if (typeof value === 'object' && value !== null) {
+        value = reactive(this.deepClone(value)) as T[typeof k]
       }
+
+      const _ref = ref(value) as Ref<T[typeof k]>
 
       this.properties[k] = computed({
         get: () => _ref.value,
         set: (val) => {
           const oldVal = this.deepClone(_ref.value)
 
-          // If this is an object, wrap it in our special proxy
-          if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
-            _ref.value = this.createDeepWatchedObject(k.toString(), val) as T[typeof k]
+          // Make objects and arrays reactive
+          if (typeof val === 'object' && val !== null) {
+            _ref.value = reactive(this.deepClone(val)) as T[typeof k]
           } else {
             _ref.value = val
           }
@@ -113,12 +115,6 @@ export abstract class State<T extends object> {
               hook.prevVal = this.deepClone(_ref.value)
             }
           }
-
-          // If this is an object, also check for changes to nested properties
-          if (typeof val === 'object' && val !== null && !Array.isArray(val) &&
-            typeof oldVal === 'object' && oldVal !== null && !Array.isArray(oldVal)) {
-            this.compareAndTriggerNestedHooks(k.toString(), val, oldVal)
-          }
         }
       }) as Ref<T[typeof k]>
     }
@@ -132,161 +128,6 @@ export abstract class State<T extends object> {
     if (typeof value !== 'object') return value
 
     return JSON.parse(JSON.stringify(value)) as V
-  }
-
-  /**
-   * Creates a special object that maintains reactivity and triggers hooks when modified
-   */
-  private createDeepWatchedObject<V>(path: string, obj: V): V {
-    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
-      return obj;
-    }
-
-    const self = this;
-    return new Proxy(obj as object, {
-      get(target, prop) {
-        if (typeof prop === 'symbol' || prop === 'toJSON') {
-          return Reflect.get(target, prop);
-        }
-
-        const value = Reflect.get(target, prop);
-
-        // If nested object, create another proxy
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          return self.createDeepWatchedObject(`${path}.${String(prop)}`, value);
-        }
-
-        return value;
-      },
-      set(target, prop, value) {
-        if (typeof prop === 'symbol') {
-          return Reflect.set(target, prop, value);
-        }
-
-        const fullPath = `${path}.${String(prop)}`;
-
-        // Set the value
-        Reflect.set(target, prop, value);
-
-        // Get the top-level key
-        const topLevelKey = path.split('.')[0] as keyof T;
-
-        // Trigger persistence
-        if (self._persist) {
-          self._driver.set(self._persistKey, self.export());
-        }
-
-        // Trigger the hook for this nested property
-        const hook = self._nestedChangeHooks.get(fullPath);
-        if (hook) {
-          if (hook.debouncedHandler) {
-            hook.debouncedHandler(value, hook.prevVal);
-          } else {
-            hook.handler(value, hook.prevVal);
-            hook.prevVal = value;
-          }
-        }
-
-        // Manually trigger the hook for the parent property
-        // This is crucial for components that modify nested properties
-        const parentHook = self._changeHooks[topLevelKey];
-        if (parentHook) {
-          const parentValue = self.properties[topLevelKey].value;
-          if (parentHook.debouncedHandler) {
-            parentHook.debouncedHandler(parentValue, parentHook.prevVal);
-          } else {
-            hook.handler(parentValue, parentHook.prevVal);
-            parentHook.prevVal = self.deepClone(parentValue);
-          }
-        }
-
-        return true;
-      }
-    }) as V;
-  }
-
-  /**
-   * Compare nested objects and trigger hooks for changed properties
-   */
-  private compareAndTriggerNestedHooks<V extends object>(
-    path: string,
-    newObj: V,
-    oldObj: V
-  ): void {
-    // Get all properties from both objects
-    const allProps = new Set([
-      ...Object.keys(oldObj),
-      ...Object.keys(newObj)
-    ])
-
-    for (const prop of allProps) {
-      const fullPath = `${path}.${prop}`
-      const oldValue = (oldObj as Record<string, unknown>)[prop]
-      const newValue = (newObj as Record<string, unknown>)[prop]
-
-      // Check if the value changed
-      if (!this.isEqual(oldValue, newValue)) {
-        // Trigger hook for this specific path
-        const hook = this._nestedChangeHooks.get(fullPath)
-        if (hook) {
-          if (hook.debouncedHandler) {
-            hook.debouncedHandler(newValue, hook.prevVal)
-          } else {
-            hook.handler(newValue, hook.prevVal)
-            hook.prevVal = newValue
-          }
-        }
-
-        // If both are objects, recurse
-        if (typeof oldValue === 'object' && oldValue !== null && !Array.isArray(oldValue) &&
-          typeof newValue === 'object' && newValue !== null && !Array.isArray(newValue)) {
-          this.compareAndTriggerNestedHooks(
-            fullPath,
-            newValue as object,
-            oldValue as object
-          )
-        }
-      }
-    }
-  }
-
-  /**
-   * Simple deep equality check
-   */
-  private isEqual(a: unknown, b: unknown): boolean {
-    if (a === b) return true
-
-    if (a === null || b === null) return false
-    if (a === undefined || b === undefined) return false
-
-    if (typeof a !== typeof b) return false
-
-    if (typeof a === 'object' && typeof b === 'object') {
-      const aArray = Array.isArray(a)
-      const bArray = Array.isArray(b)
-
-      if (aArray !== bArray) return false
-
-      if (aArray && bArray) {
-        const arrayA = a as unknown[]
-        const arrayB = b as unknown[]
-        if (arrayA.length !== arrayB.length) return false
-        return arrayA.every((val, i) => this.isEqual(val, arrayB[i]))
-      }
-
-      const objA = a as Record<string, unknown>
-      const objB = b as Record<string, unknown>
-
-      const keysA = Object.keys(objA).sort()
-      const keysB = Object.keys(objB).sort()
-
-      if (keysA.length !== keysB.length) return false
-      if (!keysA.every((k, i) => k === keysB[i])) return false
-
-      return keysA.every(k => this.isEqual(objA[k], objB[k]))
-    }
-
-    return false
   }
 
   /**
@@ -333,113 +174,196 @@ export abstract class State<T extends object> {
    *              - An array of paths to watch (triggers when any changes)
    * @param handler Function to call when the property changes
    * @param options Optional configuration for debounce and reset behavior
+   * @returns A function to remove the subscription
    */
   public subscribe<P extends Path<T>>(
     paths: P,
     handler: ChangeHandler<PathValue<T, P & string>>,
     options?: { debounce?: number; executeOnReset?: boolean }
-  ): void
+  ): () => void
   public subscribe<P extends Path<T>>(
     paths: P[],
     handler: (changedPath: P, state: T) => void,
     options?: { debounce?: number; executeOnReset?: boolean }
-  ): void
+  ): () => void
   public subscribe<P extends Path<T>>(
     paths: P | P[],
     handler: ChangeHandler<PathValue<T, P & string>> | ((changedPath: P, state: T) => void),
     options?: { debounce?: number; executeOnReset?: boolean }
-  ): void {
+  ): () => void {
+    // Keep track of all watchers for cleanup
+    const stopFunctions: (() => void)[] = []
+
     // If paths is an array, register handlers for each path
     if (Array.isArray(paths)) {
       for (const path of paths) {
         // For arrays, we expect the handler to have the signature (changedPath, state) => void
-        const pathHandler: ChangeHandler<PathValue<T, P & string>> = () => {
+        const pathHandler = () => {
           (handler as (changedPath: P, state: T) => void)(path, this.export())
         }
 
         // Register handler for this individual path
-        this.registerPathChangeHandler(path, pathHandler, options)
+        const stop = this.setupWatcher(path as string, pathHandler, options)
+        stopFunctions.push(stop)
       }
     } else {
       // For single paths, register directly with the provided handler
-      this.registerPathChangeHandler(paths, handler as ChangeHandler<PathValue<T, P & string>>, options)
+      const stop = this.setupWatcher(
+        paths as string,
+        handler as ChangeHandler<unknown>,
+        options
+      )
+      stopFunctions.push(stop)
     }
+
+    // Return a function that stops all watchers
+    return () => stopFunctions.forEach(stop => stop())
   }
 
   /**
-   * Internal method to register a change handler for a specific path
+   * Internal method to set up a watcher for a specific path
    */
-  private registerPathChangeHandler<P extends Path<T>>(
-    path: P,
-    handler: ChangeHandler<PathValue<T, P & string>>,
+  private setupWatcher(
+    path: string,
+    handler: (newVal?: unknown, oldVal?: unknown) => void,
     options?: { debounce?: number; executeOnReset?: boolean }
-  ): void {
-    const pathStr = path as string
+  ): () => void {
+    const pathParts = path.split('.')
+    const debouncedHandler = options?.debounce && options.debounce > 0
+      ? debounce(handler, options.debounce)
+      : undefined
 
-    // Check if this is a top-level property
-    if (pathStr in this.properties) {
-      const key = pathStr as keyof T
-      const prevVal = this.deepClone(this.properties[key].value)
-      const hook: RegisteredHook<T[typeof key]> = {
+    // For top-level properties
+    if (pathParts.length === 1 && path in this.properties) {
+      const key = path as keyof T
+      const effectiveHandler = debouncedHandler || handler
+
+      // Save hook for reset handling
+      this._changeHooks[key] = {
         handler: handler as ChangeHandler<T[typeof key]>,
-        prevVal,
+        prevVal: this.deepClone(this.properties[key].value),
+        debouncedHandler: debouncedHandler as any,
         executeOnReset: options?.executeOnReset ?? false
       }
 
-      if (options?.debounce && options.debounce > 0) {
-        hook.debouncedHandler = debounce((val: T[typeof key], oldVal: T[typeof key]) => {
-          (handler as ChangeHandler<T[typeof key]>)(val, oldVal)
-          hook.prevVal = this.deepClone(val)
-        }, options.debounce)
-      }
+      // Set up watcher for this property
+      const stopWatch = watch(
+        () => this.properties[key].value,
+        (newVal, oldVal) => {
+          if (!this.isEqual(newVal, oldVal)) {
+            effectiveHandler(newVal, oldVal)
+            this._changeHooks[key]!.prevVal = this.deepClone(newVal)
+          }
+        },
+        { deep: true }
+      )
 
-      this._changeHooks[key] = hook
-    }
-    // Handle nested properties
-    else if (pathStr.includes('.')) {
-      const prevVal = this.getValueByPath(pathStr)
+      // Save stop function for cleanup
+      const watchId = `prop:${key}`
+      this._watchStopFunctions.set(watchId, stopWatch)
 
-      if (prevVal !== undefined) {
-        const hook: RegisteredHook<unknown> = {
-          handler: handler as ChangeHandler<unknown>,
-          prevVal,
-          executeOnReset: options?.executeOnReset ?? false
+      return () => {
+        if (this._watchStopFunctions.has(watchId)) {
+          this._watchStopFunctions.get(watchId)!()
+          this._watchStopFunctions.delete(watchId)
         }
-
-        if (options?.debounce && options.debounce > 0) {
-          hook.debouncedHandler = debounce((val: unknown, oldVal: unknown) => {
-            (handler as ChangeHandler<unknown>)(val, oldVal)
-            hook.prevVal = val
-          }, options.debounce)
-        }
-
-        this._nestedChangeHooks.set(pathStr, hook)
+        delete this._changeHooks[key]
       }
     }
+
+    // For nested properties
+    const topLevelKey = pathParts[0] as keyof T
+
+    if (topLevelKey in this.properties) {
+      // Create a nested property getter
+      const getter = () => {
+        let obj = this.properties[topLevelKey].value
+
+        for (let i = 1; i < pathParts.length; i++) {
+          if (!obj || typeof obj !== 'object') return undefined
+          obj = (obj as any)[pathParts[i]]
+        }
+
+        return obj
+      }
+
+      const effectiveHandler = debouncedHandler || handler
+
+      // Store info for reset handling
+      this._nestedChangeHooks.set(path, {
+        handler: handler as ChangeHandler<unknown>,
+        prevVal: this.deepClone(getter()),
+        debouncedHandler: debouncedHandler as any,
+        executeOnReset: options?.executeOnReset ?? false
+      })
+
+      // Set up watcher for this nested property
+      const stopWatch = watch(
+        getter,
+        (newVal, oldVal) => {
+          if (!this.isEqual(newVal, oldVal)) {
+            effectiveHandler(newVal, oldVal)
+            const hook = this._nestedChangeHooks.get(path)
+            if (hook) hook.prevVal = this.deepClone(newVal)
+          }
+        },
+        { deep: true }
+      )
+
+      // Save stop function for cleanup
+      const watchId = `nested:${path}`
+      this._watchStopFunctions.set(watchId, stopWatch)
+
+      return () => {
+        if (this._watchStopFunctions.has(watchId)) {
+          this._watchStopFunctions.get(watchId)!()
+          this._watchStopFunctions.delete(watchId)
+        }
+        this._nestedChangeHooks.delete(path)
+      }
+    }
+
+    // If path doesn't exist, return a no-op
+    return () => {}
   }
 
   /**
-   * Get a value from the state using a dot-notation path
+   * Simple deep equality check
    */
-  private getValueByPath(path: string): unknown {
-    const parts = path.split('.')
-    const topLevelKey = parts[0] as keyof T
+  private isEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true
 
-    if (!(topLevelKey in this.properties)) {
-      return undefined
-    }
+    if (a === null || b === null) return false
+    if (a === undefined || b === undefined) return false
 
-    let value: unknown = this.properties[topLevelKey].value
+    if (typeof a !== typeof b) return false
 
-    for (let i = 1; i < parts.length; i++) {
-      if (!value || typeof value !== 'object') {
-        return undefined
+    if (typeof a === 'object' && typeof b === 'object') {
+      const aArray = Array.isArray(a)
+      const bArray = Array.isArray(b)
+
+      if (aArray !== bArray) return false
+
+      if (aArray && bArray) {
+        const arrayA = a as unknown[]
+        const arrayB = b as unknown[]
+        if (arrayA.length !== arrayB.length) return false
+        return arrayA.every((val, i) => this.isEqual(val, arrayB[i]))
       }
 
-      value = (value as Record<string, unknown>)[parts[i]]
+      const objA = a as Record<string, unknown>
+      const objB = b as Record<string, unknown>
+
+      const keysA = Object.keys(objA).sort()
+      const keysB = Object.keys(objB).sort()
+
+      if (keysA.length !== keysB.length) return false
+      if (!keysA.every((k, i) => k === keysB[i])) return false
+
+      return keysA.every(k => this.isEqual(objA[k], objB[k]))
     }
 
-    return value
+    return false
   }
 
   protected getPersistenceDriver(): PersistenceDriver {
@@ -506,5 +430,23 @@ export abstract class State<T extends object> {
 
   public get persistKey(): string {
     return this._persistKey
+  }
+
+  /**
+   * Clean up all watchers when the state is no longer needed
+   */
+  public destroy(): void {
+    // Stop all watchers
+    for (const stopFn of this._watchStopFunctions.values()) {
+      stopFn()
+    }
+    this._watchStopFunctions.clear()
+
+    // Clear all hooks
+    this._changeHooks = {}
+    this._nestedChangeHooks.clear()
+
+    // Remove reference to proxy
+    this._stateProxy = null
   }
 }
