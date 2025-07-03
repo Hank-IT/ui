@@ -92,8 +92,6 @@ export abstract class State<T extends object> {
       this.properties[k] = computed({
         get: () => _ref.value,
         set: (val) => {
-          const oldVal = this.deepClone(_ref.value)
-
           // Make objects and arrays reactive
           if (typeof val === 'object' && val !== null) {
             _ref.value = reactive(this.deepClone(val)) as T[typeof k]
@@ -259,7 +257,7 @@ export abstract class State<T extends object> {
       )
 
       // Save stop function for cleanup
-      const watchId = `prop:${key}`
+      const watchId = `prop:${String(key)}`
       this._watchStopFunctions.set(watchId, stopWatch)
 
       return () => {
@@ -311,7 +309,7 @@ export abstract class State<T extends object> {
       )
 
       // Save stop function for cleanup
-      const watchId = `nested:${path}`
+      const watchId = `nested:${String(path)}`
       this._watchStopFunctions.set(watchId, stopWatch)
 
       return () => {
