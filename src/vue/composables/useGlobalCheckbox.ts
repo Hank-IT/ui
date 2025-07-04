@@ -50,6 +50,7 @@ export default function <T>(
   const checked = computed({
     get: () => {
       const totalCount: number = options.totalCount()
+
       return selectedRows.value.length > 0 && selectedRows.value.length === totalCount
     },
     set: (value: boolean) => {
@@ -59,20 +60,37 @@ export default function <T>(
     }
   })
 
-  async function handleGlobalCheckboxChange(event: Event) {
-    event.preventDefault()
+  // Check if all elements are already displayed on the current page
+  const isAllElementsOnCurrentPage = (): boolean => {
+    return options.getPage().length === options.totalCount()
+  }
 
+  async function handleGlobalCheckboxChange(event: Event) {
     if (!(event.target instanceof HTMLInputElement)) {
       return
     }
 
     const pageData: T[] = options.getPage()
-    const mountedDialog = mountDialog()
 
-    if (!mountedDialog?.exposed) return
+    // If all elements are on the current page, we can skip the dialog
+    // as both options would result in the same selection
+    const allElementsOnPage = isAllElementsOnCurrentPage()
 
     // Case 1: Nothing is selected (unchecked state)
     if (!checked.value && !indeterminate.value) {
+      if (allElementsOnPage) {
+        // All elements are already on the current page, just select them
+        selectedRows.value = [...pageData]
+        return
+      }
+
+      // We need preventDefault() here because we're showing a dialog
+      // and don't want the checkbox to be checked until the user makes a choice
+      event.preventDefault();
+
+      const mountedDialog = mountDialog()
+      if (!mountedDialog?.exposed) return
+
       // When clicking the empty checkbox, ask if user wants current page or all entries
       if (await mountedDialog.exposed['open']) {
         // User clicked "All Elements" button
@@ -86,7 +104,20 @@ export default function <T>(
 
     // Case 2: Indeterminate state (some items selected, not all)
     if (indeterminate.value) {
-      // When clicking the indeterminate checkbox, ask if user wants all entries or unselect all
+      if (allElementsOnPage) {
+        // If all elements are on the page, just select them all
+        selectedRows.value = [...pageData]
+        return
+      }
+
+      // We need preventDefault() here because we're showing a dialog
+      // and don't want the checkbox to be checked until the user makes a choice
+      event.preventDefault();
+
+      const mountedDialog = mountDialog()
+      if (!mountedDialog?.exposed) return
+
+      // When clicking the indeterminate checkbox, ask if the user wants all entries or unselect all
       if (await mountedDialog.exposed['open']) {
         // User clicked "All Elements" button
         selectedRows.value = await options.getAll()
@@ -99,14 +130,8 @@ export default function <T>(
 
     // Case 3: Checked state (all items selected)
     if (checked.value) {
-      // When clicking the checked checkbox, ask if user wants current page or unselect all
-      if (await mountedDialog.exposed['open']) {
-        // User clicked "Current Page" button
-        selectedRows.value = [...pageData]
-      } else {
-        // User clicked "Discard" button
-        selectedRows.value = []
-      }
+      // When all items are selected, we just clear the selection without a dialog
+      selectedRows.value = []
       return
     }
   }
