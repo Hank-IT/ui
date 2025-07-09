@@ -14,6 +14,7 @@
     "./helpers": "./src/helpers.ts",
     "./vue": "./src/vue/index.ts",
     "./vue/forms": "./src/vue/forms/index.ts",
+    "./vue/forms/validation": "./src/vue/forms/validation/index.ts",
     "./vue/requests": "./src/vue/requests/index.ts",
     "./vue/state": "./src/vue/state/index.ts"
   },
