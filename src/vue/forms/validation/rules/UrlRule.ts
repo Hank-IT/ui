@@ -6,8 +6,8 @@ export class UrlRule<FormBody extends object> extends BaseRule<FormBody> {
   }
 
   public validate(value: unknown): boolean {
-    if (!value) {
-      return false
+    if (!value || typeof value !== 'string') {
+      return false;
     }
 
     try {
