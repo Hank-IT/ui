@@ -8,8 +8,8 @@ DOCS_BUILD="${SCRIPT_DIR}/../../docs/.vitepress/dist"
 VERSION="${1:-latest}"
 
 # -------- CHECK ENV --------
-if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-  echo "GITHUB_TOKEN not set"; exit 1
+if [[ -z "${GITHUB_ACCESS_TOKEN:-}" ]]; then
+  echo "GITHUB_ACCESS_TOKEN not set"; exit 1
 fi
 
 # -------- BUILD DOCS (if needed) --------
@@ -20,7 +20,7 @@ fi
 
 # -------- CLONE BRANCH --------
 TEMP_DIR=$(mktemp -d)
-git clone --branch "$BRANCH" --depth 1 "https://${GITHUB_TOKEN}@${REPO}" "$TEMP_DIR"
+git clone --branch "$BRANCH" --depth 1 "https://${GITHUB_ACCESS_TOKEN}@${REPO}" "$TEMP_DIR"
 cd "$TEMP_DIR"
 
 # -------- COPY DOCS --------
