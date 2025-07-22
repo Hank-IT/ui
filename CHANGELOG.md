@@ -1,3 +1,14 @@
+## v3.13.2 - 2025-07-22
+
+## [3.13.2](https://github.com/Hank-IT/ui/compare/v3.13.1...v3.13.2) (2025-07-22)
+
+
+### Bug Fixes
+
+* Adjust access token var name in publishing script ([81efc7b](https://github.com/Hank-IT/ui/commit/81efc7be90835324cd74b951661cd42f34f627bb))
+
+
+
 ## v3.13.1 - 2025-07-22
 
 ## 3.13.1 (2025-07-22)
