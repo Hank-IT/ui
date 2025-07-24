@@ -33,10 +33,7 @@ Forms can automatically save their state to browser storage (session, local, etc
 return without losing their input.
 
 ````typescript
-protected override
-getPersistenceDriver()
-:
-PersistenceDriver
+protected override getPersistenceDriver(): PersistenceDriver
 {
     return new SessionStorageDriver() // Or LocalStorageDriver, etc.
 }
@@ -47,11 +44,7 @@ PersistenceDriver
 Transform form values before they are sent to the server using getter methods:
 
 ````typescript
-protected
-getStartedAt()
-:
-string
-{
+protected getStartedAt(): string {
     return DateTime.fromFormat(`${this.state.start_date} ${this.state.start_time}`, 'dd.MM.yyyy HH:mm').toISO()
 }
 ````
@@ -61,15 +54,7 @@ string
 Map server-side validation errors to specific form fields, with support for nested fields:
 
 ````typescript
-protected override
-errorMap: {
-    [serverKey
-:
-    string
-]:
-    string | string[]
-}
-= {
+protected override errorMap: { [serverKey: string]: string | string[] } = {
     started_at: ['start_date', 'start_time'],
     ended_at: ['end_date', 'end_time']
 }
@@ -77,13 +62,10 @@ errorMap: {
 
 ### 5. Array Management
 
-Special support for arrays with the class, enabling reactive updates to array items: `PropertyAwareArray`
+Special support for arrays with the class `PropertyAwareArray`, enabling reactive updates to array items:
 
 ````typescript
-public
-addPosition()
-:
-void {
+public addPosition(): void {
     this.addToArrayProperty('positions', {
         index: this.properties.positions.length + 1,
         gross_amount: null,
@@ -112,7 +94,7 @@ The `properties` getter provides access to each form field with its model, error
 ````html
 
 <template>
-    <input v-model="form.properties.email.model" />
+    <input v-model="form.properties.email.model.value" />
     <div v-if="form.properties.email.dirty">This field has been changed</div>
     <div v-if="form.properties.email.errors.length">{{ form.properties.email.errors[0] }}</div>
 </template>

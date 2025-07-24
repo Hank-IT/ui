@@ -3,6 +3,9 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: '@hank-it/ui',
   description: 'Documentation for the @hank-it/ui library',
+
+  base: process.env.DOCS_BASE || '/ui/latest/',
+
   themeConfig: {
 
     sidebar: [
@@ -16,14 +19,10 @@ export default defineConfig({
         text: 'Services',
         collapsed: false,
         items: [
-          {
-            text: 'Requests',
-            items: [
-              { text: 'Basic Usage', link: '/services/requests/basic-usage' },
-              { text: 'Exceptions', link: '/services/requests/exceptions' },
-              { text: 'Bulk Requests', link: '/services/requests/bulk' }
-            ]
-          },
+          { text: 'Requests', link: '/services/requests' },
+          { text: 'Pagination', link: '/services/pagination' },
+          { text: 'Support', link: '/services/support' },
+          { text: 'Persistence Drivers', link: '/services/persistence-drivers' },
           {
             text: 'Laravel Integration',
             collapsed: true,
@@ -32,9 +31,6 @@ export default defineConfig({
               { text: 'Laravel Pagination', link: '/services/laravel/pagination' }
             ]
           },
-          { text: 'Pagination', link: '/services/pagination' },
-          { text: 'Support', link: '/services/support' },
-          { text: 'Persistence Drivers', link: '/services/persistence-drivers' }
         ]
       },
       {
@@ -66,9 +62,7 @@ export default defineConfig({
     ],
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Services', link: '/services/requests/' },
-      { text: 'Vue', link: '/vue/state/' },
-      { text: 'GitHub', link: 'https://github.com/yourusername/hank-it-ui' }
+      { text: 'GitHub', link: 'https://github.com/Hank-IT/ui' }
     ]
   },
 })

@@ -8,40 +8,41 @@ URL, and the expected request/response types.
 The following example demonstrates how to define a GET request to the `/api/v1/expenses` endpoint:
 
 ```typescript
-import { BaseRequest, RequestMethodEnum, JsonResponse } from '@hank-it/ui/service/requests';
+import { BaseRequest, RequestMethodEnum, JsonResponse } from '@hank-it/ui/service/requests'
 
 export interface GenericResponseErrorInterface {
-    message: string;
+    message: string
 }
 
 export interface ExpenseIndexRequestParams {
     filter?: {
-        search_text?: string;
+        search_text?: string
     };
 }
 
 export interface ExpenseResource {
     id: string;
-// other data fields
+    // other data fields
 }
 
 export interface ExpenseIndexRequestResponseBody {
-    data: ExpenseResource[];
+    data: ExpenseResource[]
 }
 
 export class ExpenseIndexRequest extends BaseRequest<
-        GenericResponseErrorInterface,
-        ExpenseIndexRequestResponseBody,
-        JsonResponse<ExpenseIndexRequestResponseBody>,
-        undefined,
-        ExpenseIndexRequestParams
+        boolean, // Generic RequestLoaderLoadingType
+        GenericResponseErrorInterface, // Generic ResponseErrorBody
+        ExpenseIndexRequestResponseBody, // Generic ResponseBodyInterface
+        JsonResponse<ExpenseIndexRequestResponseBody>, // Generic ResponseClass
+        undefined, // Generic RequestBodyInterface
+        ExpenseIndexRequestParams // RequestParamsInterface
 > {
     public method(): RequestMethodEnum {
-        return RequestMethodEnum.GET;
+        return RequestMethodEnum.GET
     }
 
     public url(): string {
-        return '/api/v1/expenses';
+        return '/api/v1/expenses'
     }
 }
 ```
@@ -62,13 +63,12 @@ export class ExpenseIndexRequest extends BaseRequest<
 Once the request is defined, you can send it using the following code:
 
 ```typescript
-const request = new ExpenseIndexRequest();
+const request = new ExpenseIndexRequest()
 
 // The response type and body are inferred automatically.
-request.send().then((response: JsonResponse<ExpenseIndexRequestResponseBody>) => {
-    const body = response.getBody(); // Type: ExpenseIndexRequestResponseBody
-});
+const response: JsonResponse<ExpenseIndexRequestResponseBody> = await request.send()
+
+const body = response.getBody() // Type: ExpenseIndexRequestResponseBody
 ```
 
-This completes the setup and usage of the request driver and custom requests. You can now use these patterns to create
-additional requests as needed.
+This completes the setup and usage of the request driver and custom requests. You can now use these patterns to create additional requests as needed.

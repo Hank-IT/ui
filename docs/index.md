@@ -23,9 +23,9 @@ To set up the fetch driver, import `BaseRequest` and `FetchDriver` from '@hank-i
 the driver as shown:
 
 ```typescript
-import { BaseRequest, FetchDriver } from '@hank-it/ui/service/requests';
+import { BaseRequest, FetchDriver } from '@hank-it/ui/service/requests'
 
-BaseRequest.setRequestDriver(new FetchDriver());
+BaseRequest.setRequestDriver(new FetchDriver())
 ```
 
 ### Enabling Credential Support
@@ -36,7 +36,7 @@ follows:
 ```typescript
 BaseRequest.setRequestDriver(new FetchDriver({
     corsWithCredentials: true,
-}));
+}))
 ```
 
 ### Adding Global Headers
@@ -48,5 +48,23 @@ BaseRequest.setRequestDriver(new FetchDriver({
     headers: {
         'X-XSRF-TOKEN': "<token>",
     },
-}));
+}))
+```
+
+Sometimes you want to refetch the header when the request is sent. You may specify a callback for this:
+
+```typescript
+BaseRequest.setRequestDriver(new FetchDriver({
+    headers: {
+        'X-XSRF-TOKEN': () => getCookie('XSRF-TOKEN')
+    },
+}))
+```
+
+### Specifying a Base URL
+
+In case your backend lives on a separate domain, you may specify a default base url, which is prepended to every request url:
+
+```typescript
+BaseRequest.setDefaultBaseUrl('https://example.com')
 ```
