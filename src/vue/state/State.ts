@@ -1,3 +1,4 @@
+
 import { debounce } from 'lodash-es'
 import { type PersistenceDriver } from '../../service/persistenceDrivers'
 import { NonPersistentDriver } from '../../service/persistenceDrivers'
@@ -10,14 +11,6 @@ export interface StateOptions {
 
 // Generic type for change handlers
 type ChangeHandler<T> = (val: T, oldVal: T) => void
-
-// Generic type for registered hooks
-interface RegisteredHook<T> {
-  handler: ChangeHandler<T>
-  prevVal: T
-  debouncedHandler?: (val: T, oldVal: T) => void
-  executeOnReset?: boolean
-}
 
 // Type for accessing nested properties with dot notation
 type PathValue<T, P extends string> =
@@ -43,14 +36,13 @@ type Path<T> = keyof T | PathsToStringProps<T>
 
 export abstract class State<T extends object> {
   private readonly properties: { [K in keyof T]: Ref<T[K]> }
-  private _changeHooks: { [K in keyof T]?: RegisteredHook<T[K]> } = {}
-  private _nestedChangeHooks: Map<string, RegisteredHook<unknown>> = new Map()
   private readonly _initial: T
   private readonly _persist: boolean
   private readonly _persistKey: string
   private _driver: PersistenceDriver
   private _stateProxy: T | null = null
   private _watchStopFunctions: Map<string, () => void> = new Map()
+  private _resetHandlers: Map<string, (() => void)[]> = new Map()
 
   protected constructor(initial: T, options?: StateOptions) {
     this._initial = initial
@@ -101,17 +93,6 @@ export abstract class State<T extends object> {
 
           if (this._persist) {
             this._driver.set(this._persistKey, this.export())
-          }
-
-          // Trigger the hook for this property
-          const hook = this._changeHooks[k]
-          if (hook) {
-            if (hook.debouncedHandler) {
-              hook.debouncedHandler(_ref.value, hook.prevVal)
-            } else {
-              hook.handler(_ref.value, hook.prevVal)
-              hook.prevVal = this.deepClone(_ref.value)
-            }
           }
         }
       }) as Ref<T[typeof k]>
@@ -171,7 +152,7 @@ export abstract class State<T extends object> {
    *              - A single path (top-level key or nested with dot notation)
    *              - An array of paths to watch (triggers when any changes)
    * @param handler Function to call when the property changes
-   * @param options Optional configuration for debounce and reset behavior
+   * @param options Optional configuration for debounce and executeOnReset
    * @returns A function to remove the subscription
    */
   public subscribe<P extends Path<T>>(
@@ -191,6 +172,7 @@ export abstract class State<T extends object> {
   ): () => void {
     // Keep track of all watchers for cleanup
     const stopFunctions: (() => void)[] = []
+    const resetHandlers: (() => void)[] = []
 
     // If paths is an array, register handlers for each path
     if (Array.isArray(paths)) {
@@ -200,18 +182,36 @@ export abstract class State<T extends object> {
           (handler as (changedPath: P, state: T) => void)(path, this.export())
         }
 
+        // Store reset handler if needed
+        if (options?.executeOnReset) {
+          resetHandlers.push(pathHandler)
+        }
+
         // Register handler for this individual path
         const stop = this.setupWatcher(path as string, pathHandler, options)
         stopFunctions.push(stop)
       }
     } else {
+      const pathHandler = handler as ChangeHandler<unknown>
+
+      // Store reset handler if needed
+      if (options?.executeOnReset) {
+        resetHandlers.push(() => pathHandler(undefined, undefined))
+      }
+
       // For single paths, register directly with the provided handler
-      const stop = this.setupWatcher(
-        paths as string,
-        handler as ChangeHandler<unknown>,
-        options
-      )
+      const stop = this.setupWatcher(paths as string, pathHandler, options)
       stopFunctions.push(stop)
+    }
+
+    // Store reset handlers for later execution
+    if (resetHandlers.length > 0) {
+      const resetId = Math.random().toString(36)
+      this._resetHandlers.set(resetId, resetHandlers)
+
+      stopFunctions.push(() => {
+        this._resetHandlers.delete(resetId)
+      })
     }
 
     // Return a function that stops all watchers
@@ -231,18 +231,11 @@ export abstract class State<T extends object> {
       ? debounce(handler, options.debounce)
       : undefined
 
+    const effectiveHandler = debouncedHandler || handler
+
     // For top-level properties
     if (pathParts.length === 1 && path in this.properties) {
       const key = path as keyof T
-      const effectiveHandler = debouncedHandler || handler
-
-      // Save hook for reset handling
-      this._changeHooks[key] = {
-        handler: handler as ChangeHandler<T[typeof key]>,
-        prevVal: this.deepClone(this.properties[key].value),
-        debouncedHandler: debouncedHandler as any,
-        executeOnReset: options?.executeOnReset ?? false
-      }
 
       // Set up watcher for this property
       const stopWatch = watch(
@@ -250,7 +243,6 @@ export abstract class State<T extends object> {
         (newVal, oldVal) => {
           if (!this.isEqual(newVal, oldVal)) {
             effectiveHandler(newVal, oldVal)
-            this._changeHooks[key]!.prevVal = this.deepClone(newVal)
           }
         },
         { deep: true }
@@ -265,7 +257,6 @@ export abstract class State<T extends object> {
           this._watchStopFunctions.get(watchId)!()
           this._watchStopFunctions.delete(watchId)
         }
-        delete this._changeHooks[key]
       }
     }
 
@@ -285,24 +276,12 @@ export abstract class State<T extends object> {
         return obj
       }
 
-      const effectiveHandler = debouncedHandler || handler
-
-      // Store info for reset handling
-      this._nestedChangeHooks.set(path, {
-        handler: handler as ChangeHandler<unknown>,
-        prevVal: this.deepClone(getter()),
-        debouncedHandler: debouncedHandler as any,
-        executeOnReset: options?.executeOnReset ?? false
-      })
-
       // Set up watcher for this nested property
       const stopWatch = watch(
         getter,
         (newVal, oldVal) => {
           if (!this.isEqual(newVal, oldVal)) {
             effectiveHandler(newVal, oldVal)
-            const hook = this._nestedChangeHooks.get(path)
-            if (hook) hook.prevVal = this.deepClone(newVal)
           }
         },
         { deep: true }
@@ -317,7 +296,6 @@ export abstract class State<T extends object> {
           this._watchStopFunctions.get(watchId)!()
           this._watchStopFunctions.delete(watchId)
         }
-        this._nestedChangeHooks.delete(path)
       }
     }
 
@@ -377,21 +355,11 @@ export abstract class State<T extends object> {
     return out
   }
 
-  public import(data: Partial<T>, suppressHooks = false): void {
+  public import(data: Partial<T>): void {
     for (const k in data) {
       if (k in this.properties) {
         const key = k as keyof T
-        // Suppress hooks if needed
-        if (suppressHooks) {
-          // Temporarily remove the hook for this property
-          const oldHook = this._changeHooks[key]
-          delete this._changeHooks[key]
-          this.properties[key].value = data[key] as T[typeof key]
-          // Restore hook
-          if (oldHook) this._changeHooks[key] = oldHook
-        } else {
-          this.properties[key].value = data[key] as T[typeof key]
-        }
+        this.properties[key].value = data[key] as T[typeof key]
       }
     }
     if (this._persist) {
@@ -400,30 +368,14 @@ export abstract class State<T extends object> {
   }
 
   public reset(): void {
-    // On reset, suppress hooks unless executeOnReset is true for that field
-    const prevHooks = { ...this._changeHooks }
-    const prevNestedHooks = new Map(this._nestedChangeHooks)
-
-    // Clear all hooks that shouldn't execute on reset
-    for (const k in this._initial) {
-      const key = k as keyof T
-      const hook = prevHooks[key]
-      if (!hook || !hook.executeOnReset) {
-        delete this._changeHooks[key]
-      }
-    }
-
-    for (const [path, hook] of prevNestedHooks.entries()) {
-      if (!hook.executeOnReset) {
-        this._nestedChangeHooks.delete(path)
-      }
-    }
-
     this.import(this._initial)
 
-    // Restore all hooks
-    this._changeHooks = prevHooks
-    this._nestedChangeHooks = prevNestedHooks
+    // Execute reset handlers
+    for (const handlers of this._resetHandlers.values()) {
+      for (const handler of handlers) {
+        handler()
+      }
+    }
   }
 
   public get persistKey(): string {
@@ -439,10 +391,7 @@ export abstract class State<T extends object> {
       stopFn()
     }
     this._watchStopFunctions.clear()
-
-    // Clear all hooks
-    this._changeHooks = {}
-    this._nestedChangeHooks.clear()
+    this._resetHandlers.clear()
 
     // Remove reference to proxy
     this._stateProxy = null
