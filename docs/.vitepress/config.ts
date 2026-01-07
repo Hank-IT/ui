@@ -20,9 +20,9 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: 'Requests', link: '/services/requests' },
-          { text: 'Pagination', link: '/services/pagination' },
-          { text: 'Support', link: '/services/support' },
-          { text: 'Persistence Drivers', link: '/services/persistence-drivers' },
+          //{ text: 'Pagination', link: '/services/pagination' },
+          //{ text: 'Support', link: '/services/support' },
+          //{ text: 'Persistence Drivers', link: '/services/persistence-drivers' },
           {
             text: 'Laravel Integration',
             collapsed: true,
@@ -44,21 +44,21 @@ export default defineConfig({
           },
           {
             text: 'Requests',
-            link: '/vue/requests/',
             items: [
-              { text: 'Usage with Composition API', link: '/vue/requests/composition' },
+              /*{ text: 'Usage with Composition API', link: '/vue/requests/composition' },
               { text: 'Loading States', link: '/vue/requests/loading' },
-              { text: 'Error Handling', link: '/vue/requests/errors' }
+              { text: 'Error Handling', link: '/vue/requests/errors' },*/
+              { text: 'Route Model Binding', link: '/vue/requests/route-model-binding' }
             ]
           }
         ]
       },
-      {
+      /*{
         text: 'Helpers',
         items: [
           { text: 'Utility Functions', link: '/helpers/' }
         ]
-      }
+      }*/
     ],
     nav: [
       { text: 'Home', link: '/' },
